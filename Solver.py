@@ -2,7 +2,7 @@ from numpy import *
 import matplotlib.pyplot as plt
 from copy import deepcopy
 
-nx = 120000
+nx = 120
 X = linspace(-1,1, nx)
 
 
@@ -67,48 +67,49 @@ def solver(X, Phi, Rho, Dieelek):
 def solverLU(X, Phi, Rho, Dieelek):
 	dx = X[1]-X[2]
 	
-	Phi[1] = Phi[0] - Rho[-1]*dx
+	Phi[1] = Phi[0] + Rho[1]*dx
 	#Phi[-2] = 2*( Phi[-1] - Rho[-1]*dx*dx )
 	
 	Phi_ende = Phi[-1]
 	for j in range(len(Phi)-2):
-		Phi[j+2] = 2*Phi[j+1] - Phi[j] + 2*Rho[j+1]*dx**2
-	
-	Phi = (Phi + Phi[0])/2
-	Phi = Phi + (Phi_ende-Phi[-1])*(X-X[0])/2
-	
+		Phi[j+2] = 2*Phi[j+1] - Phi[j] + Rho[j+1]*dx**2
+	#Phi = (Phi + Phi[0])/2
+	Phi = Phi + (Phi_ende-Phi[-1])*(X-X[0])/2	
 	return Phi
 
 #-----------------------------------------------------------
 
 #Test 1
 plt.figure()
-A = loadtxt("Optimale Lösung")
+
+#A = loadtxt("Optimale Lösung")
 #plt.plot(X,A, color = "r")
-
-Rho = zeros(nx)
-Dieelek = Rho + 1
-Phi = zeros(nx) 
-#for i in range(len(Phi)-1) :
-	#Phi[i+1] = Phi[i] + 1
-
-Rho = 12*X**2
-#Rho  = cos(2*pi*X) 
-
-plt.plot(X,Rho)
 
 Dieelek = ones(nx)
 Phi = zeros(nx)
-Phi[0] = 1; Phi[-1] = 1
 
+
+Rho = zeros(nx)
+# test 0
+#Phi[0] = -1; Phi[-1] = 1
+#Rho = 6*X
+#plt.plot(X, X**3,color = "R")
+# test 1
+#Phi[0] = 1; Phi[-1] = 1
+#Rho = 12*X**2
+#plt.plot(X, X**4,color = "R")
+# test 2
+Phi[0] = -1/(4*pi**2); Phi[-1] = -1/(4*pi**2)
+Rho  = cos(2*pi*X) 
+plt.plot(X,-cos(2*pi*X)/(4*pi**2), color = "R")
+
+plt.plot(X,Rho)
 
 Phi = solverLU(X, Phi, Rho, Dieelek)
 #for i in range(int(nx**1.5)) :
 	#Phi = solver(X, Phi, Rho, Dieelek)
 
-plt.plot(X, X**4,color = "R")
-#plt.plot(X,-cos(2*pi*X), color = "R")
 plt.plot(X, Phi, color = "G")
 
-savetxt("Optimale Lösung", Phi)
+#savetxt("Optimale Lösung", Phi)
 plt.show()
