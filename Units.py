@@ -18,7 +18,7 @@ e0 = 55.263e-3 # (e-)/(V*nm)
 Platinum_WorkFunktion = 5.2 #V [ @ 5.0 - 5.5 eV ]
 
 # Pt/TiO2 barrierheight
-BarrierHeight = 1.9 #eV
+BarrierHeight = -1.9 #eV
 
 # Semiconductor Properties
 # [TiO2]
@@ -30,7 +30,7 @@ Titanium_DielectricityFactor = 70	#[ @ 86 - 173 ]
 Titanium_DopingDensity = 1e-4	#[1e23 /m**3]
 Titanium_DopingCharge = 2
 # Oxygen Vacancy Mobility
-Titanium_DopingMobility = 2.5 	#[nm**2 / V/s]
+Titanium_DopingMobility = 2500 	#[nm**2 / V/s]
 
 #------------------------------------------
 # Strungaru Paper
