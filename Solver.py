@@ -13,22 +13,26 @@ def solver(X, Phi, Rho, Dieelek):
 """
 
 def solverLU(X, Phi, Rho, Dieelek):
-	dx = X[1]-X[2]
-	#Phi[1] = Phi[0] = u.BarrierHeight
-	#Phi[-2] = 2*( Phi[-1] - Rho[-1]*dx*dx )
+	dx = X[1]-X[0]
+	Phi[1] = Phi[0]# = u.BarrierHeight
+	
 	Phi_ende = Phi[-1]
-	Rho2 = (Rho[1:]+Rho[-1])
+	
+	Rho2 = zeros(len(X)-1)
+	for i in range(len(X)-1) :
+		Rho2[i] = (Rho[i+1] + Rho[i])/2
+
 	for j in range(len(Phi)-2):
-		Phi[j+2] = 2*Phi[j+1] - Phi[j] - Rho2[j]*dx**2/Dieelek[j+1]
-	#Phi = (Phi + Phi[0])/2
+		Phi[j+2] = 2*Phi[j+1] - Phi[j] - Rho2[j+1]*dx**2/Dieelek[j+1]
+	
 	Phi = Phi + (Phi_ende-Phi[-1])*(X-X[0])/(X[-1]-X[0])
 	return Phi
 
 def E_Field(X, Phi):
-	dx = X[1]-X[2]
+	dx = X[1]-X[0]
 	E = deepcopy(X)
 	for i in range(len(Phi)-1) :
-		E[i+1] = (Phi[i] - Phi[i+1])/dx
+		E[i+1] = (Phi[i+1] - Phi[i])/dx
 	E[0] = E[1]
 	
 	return E
@@ -36,22 +40,41 @@ def E_Field(X, Phi):
 def solverLU_backward(X, Phi, Rho, Dieelek):
 	dx = X[1]-X[2]
 	n = len(Phi)
-	Phi[:] = 0
 	
-	#Phi[-2] = Phi[-1] = 0 #+ Rho[1]*dx
-	#Phi[-2] = 2*( Phi[-1] - Rho[-1]*dx*dx )
-	
-	Rho2 = (Rho[1:]+Rho[-1])
-	#Phi_ende = Phi[0]
+	Rho2 = zeros(len(X)-1)
+	for i in range(len(X)-1) :
+		Rho2[i] = (Rho[i+1] + Rho[i])/2
+		
 	for j in range(len(Phi)-2):
 		Phi[n-3-j] = 2*Phi[n-j-2] - Phi[n-j-1] - Rho2[n-j-2]*dx**2/Dieelek[n-j-2]
-		
-	#Phi = (Phi + Phi[0])/2
-	#Phi = Phi + (Phi_ende-Phi[-1])*(X-X[0])/(X[-1]-X[0])
 	
 	return Phi
 	
 #-----------------------------------------------------------
+
+
+
+
+"""
+#Test 2
+n = 1e6
+X = linspace(0,1000, n)
+Rho = zeros(n)
+Rho[:200000] = 2.5e-3
+Rho[200000:500000] = 1e-3
+Dieelek = ones(n)*u.Titanium_DielectricityFactor*u.e0
+Phi = zeros(n)
+
+Phi[0] = -40
+Phi = solverLU(X, Phi, Rho, Dieelek)
+
+#Phi = solverLU_backward(X, Phi, Rho, Dieelek)
+E = E_Field(X,Phi)
+#plt.plot(X, E)
+plt.plot(Rho+.01)
+#plt.plot(X, Phi)
+plt.show()
+"""
 """
 nx = 10000
 X = linspace(0, 2, nx)
