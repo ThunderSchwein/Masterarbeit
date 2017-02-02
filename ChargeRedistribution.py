@@ -1,3 +1,12 @@
+""" 31.01.2017 Konstantin Murasov
+This Module calculates the Distribution of charges, which
+results from doping migration in a TiO2-Sample, with Data
+provided by "Schottky.py"
+
+Please take note that "ReloadDeltaPhi"-Method utilizes a
+try-and-error approach.
+"""
+
 from numpy import *
 import matplotlib.pyplot as plt
 from copy import deepcopy
@@ -27,29 +36,47 @@ def ReloadFermi(X, DopingDensity, Potential, ElectricField ,FermiLevel = 0):
 	return ChargeDensity
 
 def ReloadDeltaPhi(X, DopingDensity, ChargeDensity, Potential, Dieelek, W, FermiLevel = 0) :
+	#print("Redistributing the Electrons")
 	nx = len(X)
+	# Detemining the ruling Potential
 	Phi2 = zeros(len(X))
 	Phi2[-1] = Phi2[-2] = 0
 	Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
+	
+	#if()
 	
 	#W = (2*(u.Titanium_DielectricityFactor*u.e0)*abs(u.BarrierHeight*2-Phi2[0])/(u.Titanium_DopingCharge*u.Titanium_DopingDensity))**.5
 	ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
 	Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
 	
-	while (Phi2[0]>u.BarrierHeight*0.995):
-		print(1, W, Phi2[0])
-		W = W*1.005
+	while (Phi2[0]>(u.BarrierHeight*0.995+FermiLevel)):
+		W = W*1.002
 		ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
 		Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-	
-	while (Phi2[0]<u.BarrierHeight*1.005):
-		W = W / 1.0025
+		#print(1, W, Phi2[0])
+	while (Phi2[0]<(u.BarrierHeight*1.01+FermiLevel)):
+		W = W / 1.001
 		ChargeDensity[:] = 0
 		ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
 		Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-		print(2, W, Phi2[0])
+		#print(2, W, Phi2[0])
+		
+	while (Phi2[0]>(u.BarrierHeight*0.995+FermiLevel)):
+		W = W*1.0005
+		ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
+		Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
+		#print(3, W, Phi2[0])
+	while (Phi2[0]<(u.BarrierHeight*1.01+FermiLevel)):
+		W = W / 1.0001
+		ChargeDensity[:] = 0
+		ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
+		Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
+		#print(4, W, Phi2[0])		
+		
+	#print(0, W, Phi2[0])
 	
-	print(0, W, Phi2[0])
+	return [ChargeDensity, W]
+	
 	"""
 	W = (2*(u.Titanium_DielectricityFactor*u.e0)*abs(u.BarrierHeight*2-Phi2[0]2)/(u.Titanium_DopingCharge*u.Titanium_DopingDensity))**.5	
 	ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
@@ -61,7 +88,7 @@ def ReloadDeltaPhi(X, DopingDensity, ChargeDensity, Potential, Dieelek, W, Fermi
 	#ChargeDensity[:int((W+34)/u.DeviceLength*nx)] = DopingDensity[:int((W+34)/u.DeviceLength*nx)]*u.Titanium_DopingCharge
 	print(2, W, Phi2[0]) #,int(W/u.DeviceLength*nx), u.BarrierHeight*2-Phi2[0], solverLU_backward(X, Phi2, ChargeDensity, Dieelek)[0])	
 	"""
-	return [ChargeDensity, W]
+	
 
 """
 #-----------------------------------
