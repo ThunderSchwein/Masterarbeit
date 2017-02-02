@@ -1,3 +1,13 @@
+""" 31.01.2017 KonstantinMurasov
+This Module utilizes the Modules "DopingDrift.py" and "ChargeRedistribution.py"
+to calculate the changes in doping density and depletio length due to migration
+of doping atoms in a suffficient electric field, provided in "Units.py"
+
+Please take note that the "Initial Conditions"-Graph is only valid without
+applied external voltage.
+"""
+
+
 from numpy import *
 import matplotlib.pyplot as plt
 from copy import deepcopy
@@ -31,9 +41,6 @@ class Schottky(object) :
 		# Initail Charge density
 		self.ChargeDensity = zeros(nx)
 		self.ChargeDensity[:int(self.W/u.DeviceLength*nx)] = u.Titanium_DopingCharge*u.Titanium_DopingDensity
-		# Inital conditions Plot
-		plt.figure("Initial Conditions")
-		plt.plot(self.X, self.ChargeDensity)
 
 		#Initial Potential Calculation
 		self.Phi = zeros(nx)
@@ -42,6 +49,10 @@ class Schottky(object) :
 
 		#Electrical Field
 		E = E_Field(self.X, self.Phi)
+		
+		# Inital conditions Plot
+		plt.figure("Initial Conditions")
+		plt.plot(self.X, self.ChargeDensity)
 		plt.plot(self.X, self.Phi,color = "G")
 		plt.plot(self.X, E, color = "R")
 		
@@ -52,18 +63,21 @@ class Schottky(object) :
 		#plt.plot(X, Phi5, color = "Red")	
 		
 	#------------------------------------
-	def DopingDrift(self, Iterations):
+	def DopingDrift(self):
 		# 2. Calculate Doping Drift
 		DP = DriftRK( self.X , self.Phi, self.DopingDensity, self.dt)
-
-		for i in range(Iterations) :
+		"""
+		for i in range(Iterations-1) :
 			print(self.Phi[-1])
 			[self.ChargeDensity, self.W]  = ReloadDeltaPhi(self.X, DP, self.ChargeDensity, self.Phi, self.Dieelek, self.W, FermiLevel = self.Bias)
-			self.Phi[-1] = 0.0
+			self.Phi[-1] = 0.0; self.Phi[-2] = 0.0
+			#print(i)
 			self.Phi = solverLU(self.X, self.Phi, self.ChargeDensity, self.Dieelek)
 			DP = DriftRK( self.X , self.Phi, DP, self.dt)
-
+		"""
 		[self.ChargeDensity, self.W]  = ReloadDeltaPhi(self.X, DP, self.ChargeDensity, self.Phi, self.Dieelek, self.W, FermiLevel = self.Bias)
+		self.Phi[-1] = 0.0; self.Phi[-2] = 0.0
+		self.Phi = solverLU_backward(self.X, self.Phi, self.ChargeDensity, self.Dieelek)
 		self.DopingDensity = DP
 		
 	def PlotResults(self):
@@ -81,19 +95,18 @@ class Schottky(object) :
 		plt.plot(self.X, E2, color = "Blue")
 		plt.plot(self.X, self.DopingDensity, color = "Grey")
 
+		self.Phi[-1] = 0.0; self.Phi[-2] = 0.0
 		Phi5 = solverLU_backward(self.X, self.Phi, self.ChargeDensity, self.Dieelek)
 		plt.plot(self.X, Phi5, color = "Red")
+		
 		self.Phi[1] = self.Phi[0] = (u.BarrierHeight+self.Bias); self.Phi[-1] = 0.0
 		self.Phi = solverLU(self.X, self.Phi, self.ChargeDensity, self.Dieelek)
 		plt.plot(self.X, self.Phi, color = "Green")
 
-		#plt.plot(X, -u.e*u.e/((X+1e-1)*16*pi*u.e0*u.Titanium_DielectricityFactor*u.ds)+Phi3, color = "Green")
-
-		#solnge durchführen, bis es zum alten Wert konvergiert !!
-
-		#savetxt("Solution", (self.Phi, self.DopingDensity, self.ChargeDensity), newline="\n")
 		plt.show()
 		
-	def Diffusion(self, Iterations, DiffusionCoeffcient):
-		for i in range(Iterations):
-			self.DopingDensity = Diffusion(self.X, self.dt, self.DopingDensity, DiffusionCoeffcient)
+	def WriteToFile(self, File):
+		savetxt(File, (self.Phi, self.DopingDensity, self.ChargeDensity), newline="\n")
+	
+	def Diffusion(self, DiffusionCoeffcient):
+		self.DopingDensity = Diffusion(self.X, self.dt, self.DopingDensity, DiffusionCoeffcient)
