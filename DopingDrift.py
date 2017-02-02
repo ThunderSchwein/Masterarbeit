@@ -1,41 +1,18 @@
+""" 21.01.2017 Konstantin Murasov
+This module uses the Information provided by "Schottky.py"
+to calculate the migration of doping inside a TiO2-Sample.
+
+Please take note that the Diffusion-Method is not correct.
+
+"""
+
 from numpy import *
 import matplotlib.pyplot as plt
 from copy import deepcopy
 import Units as u
 from SolverLU import *
 
-def Drift ( X , Potential, DopingDensity, dt):
-	Phi = Potential
-	#Rho = ChargeDensity
-	#Di = Dielectricity1D
-	DP = zeros(len(DopingDensity))
-	
-	E = E_Field(X, Phi)
-	dx = X[1]-X[0]
-	
-	for i in range(1, len(DP)):
-		if (DopingDensity[i] != 0) & (abs(E[i]) > 4e-4) :
-			DP[i] = DP[i] - DopingDensity[i]/2
-			
-			
-			#DP[i+int(sign(E[i]))] = DP[i+int(sign(E[i]))] + DP[i]/2
-			#DP[i+10] = DP[i+10] + DopingDensity[i]/2
-			
-			#k=1
-			
-			k = i+int(-E[i]*u.Titanium_DopingMobility/dx*dt)
-			#f = k%1-0.5
-			
-			
-			DP[k-1] = DP[k-1] + DopingDensity[i]/8
-			DP[k]   = DP[k] + DopingDensity[i]/4
-			DP[k+1] = DP[k+1] + DopingDensity[i]/8
-			
-			# include Gaussian Statistics
-	return (DP+DopingDensity)
 
-
-	
 def DriftRK( X , Potential, DopingDensity, dt, DriftAmount = 1.0):
 	Phi = Potential
 	DP = zeros(len(DopingDensity))
@@ -45,18 +22,24 @@ def DriftRK( X , Potential, DopingDensity, dt, DriftAmount = 1.0):
 	
 	# Runge-Kutta 4th Order Scheme
 	for i in range(1,len(Phi)):
-		if (DopingDensity[i] != 0) & (abs(E[i]) > 4e-4) :
-			k1 = E[i]*u.Titanium_DopingMobility*dt
-			k2 = E[int(i- k1/2)]*u.Titanium_DopingMobility*dt
-			k3 = E[int(i- k2/2)]*u.Titanium_DopingMobility*dt
-			k4 = E[int(i- k3)  ]*u.Titanium_DopingMobility*dt
+		if (DopingDensity[i] != 0) & (abs(E[i]) > u.E_min) :
+			k1 = E[i]*u.Titanium_DopingMobility*dt/dx
+			
+			if(k1/2>i): k2 = E[0]*u.Titanium_DopingMobility*dt/dx
+			else 	  : k2 = E[abs(int(i- k1/2))]*u.Titanium_DopingMobility*dt/dx
+			
+			if(k2/2>i): k3 = E[0]*u.Titanium_DopingMobility*dt/dx
+			else 	  : k3 = E[abs(int(i- k2/2))]*u.Titanium_DopingMobility*dt/dx
+			
+			if(k3>i)  : k4 = E[0]*u.Titanium_DopingMobility*dt/dx
+			else 	  : k4 = E[abs(int(i- k3))  ]*u.Titanium_DopingMobility*dt/dx
 			
 			k0 = (k1/6 + k2/3 + k3/3 + k4/6)
 	# k0 is the change in the index		
 	# k = new index of a given moving Doping partition
 			k = int(i-k0)
 	# Doping must not be allowed to leave the Sample
-			if(k<10): k = k%10 + 2
+			if(k<10): k = 2
 			if(k>len(X)): k = len(X) - k*10 - 2
 	
 	# Removing the doping from its initial Position
@@ -96,23 +79,34 @@ def Diffusion(X, dt, DopingDensity, DiffusionCoeffcient):
 		
 	return DP_final
 	
-"""DP = DopingDensity
-	DP0 = DopingDensity[0:2]
 	
-	s = DiffusionCoeffcient*dt*(X[1]-X[0])
-	
-	DP[1] = DP[1] + s*(DP0[2] - 2*DP0[1] + DP0[0])
-	for i in range(len(X)-2) + 3 :
-		DP0 = [DP0[1], DP0[2], DP[i]]
-		DP[i] = - (DP0[0] + 2/s*(1-s)*DP0[1] + DP0[2]) + (2/s*(1+s)*DP[i-1] - DP[i-2] )
-	
-	return DP	
 """
-"""
+def Drift ( X , Potential, DopingDensity, dt):
+	Phi = Potential
+	#Rho = ChargeDensity
+	#Di = Dielectricity1D
+	DP = zeros(len(DopingDensity))
+	
+	E = E_Field(X, Phi)
+	dx = X[1]-X[0]
+	
 	for i in range(1, len(DP)):
-		if (DP[i] != 0) & (abs(E[i]) > 4e-4) :
-			k = int(-E[i]*u.Titanium_mob/dx*dt)
-			DP[i+k] = DP[i+k] + DopingDensity[i]/2
-			DP[i]=0
-	return DP
+		if (DopingDensity[i] != 0) & (abs(E[i]) > 4e-4) :
+			DP[i] = DP[i] - DopingDensity[i]/2
+			
+			
+			#DP[i+int(sign(E[i]))] = DP[i+int(sign(E[i]))] + DP[i]/2
+			#DP[i+10] = DP[i+10] + DopingDensity[i]/2
+			
+			#k=1
+			
+			k = i+int(-E[i]*u.Titanium_DopingMobility/dx*dt)
+			#f = k%1-0.5
+			
+			DP[k-1] = DP[k-1] + DopingDensity[i]/8
+			DP[k]   = DP[k] + DopingDensity[i]/4
+			DP[k+1] = DP[k+1] + DopingDensity[i]/8
+			
+			# include Gaussian Statistics
+	return (DP+DopingDensity)
 """
