@@ -30,17 +30,21 @@ class Schottky(object) :
 		
 		# 1. Calculate Initial Conditions
 		self.Dieelek = ones(nx)*u.e0*u.Titanium_DielectricityFactor
-		
-		# Depletion Region Width
-		self.W = (2*(u.Titanium_DielectricityFactor*u.e0)*abs(u.BarrierHeight+self.Bias)/(u.Titanium_DopingCharge*u.Titanium_DopingDensity))**.5
-		
+				
 		# Initial Doping Density
 		self.DopingDensity = zeros(self.nx)
 		self.DopingDensity[:] = u.Titanium_DopingDensity
-		
-		# Initail Charge density
+
+		# Initail Charge density & Depletion Region Width
 		self.ChargeDensity = zeros(nx)
-		self.ChargeDensity[:int(self.W/u.DeviceLength*nx)] = u.Titanium_DopingCharge*u.Titanium_DopingDensity
+		if(self.Bias > -u.BarrierHeight):
+			DepletionRegionCharge = u.Titanium_InversionCharge
+			self.W = (2*(u.Titanium_DielectricityFactor*u.e0)*abs(u.BarrierHeight+self.Bias)/(abs(u.Titanium_InversionCharge)*u.Titanium_InversionDensity))**.5
+			self.ChargeDensity[:int(self.W/u.DeviceLength*nx)] = u.Titanium_InversionCharge*u.Titanium_InversionDensity
+		else: 
+			DepletionRegionCharge = u.Titanium_DopingCharge
+			self.W = (2*(u.Titanium_DielectricityFactor*u.e0)*abs(u.BarrierHeight+self.Bias)/(u.Titanium_DopingCharge*u.Titanium_DopingDensity))**.5
+			self.ChargeDensity[:int(self.W/u.DeviceLength*nx)] = u.Titanium_DopingCharge*u.Titanium_DopingDensity
 
 		#Initial Potential Calculation
 		self.Phi = zeros(nx)
