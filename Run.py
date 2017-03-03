@@ -33,106 +33,107 @@ def Import(Sample, File):
 	Sample.DopingDensity	= D[1]
 	Sample.ChargeDensity	= D[2]
 	Sample.W = len(D[2][D[2] != 0])*Sample.dx
+	Sample.E = E_Field(Sample.X, Sample.Phi, Sample.E)
 #--------------------------------
-#Sample = S.Schottky(0, 1, 50001)
-Bias = 0 # volt
-dt = 0.1	# Seconds
-nx = 50001	# 
+def Run(Bias, dt, nx):
+	Sample = Init_Sample(Bias,dt,nx)
+	
+	"""
+	#Change the initial Charge Distribution
+	Sample.W = 550
+	Sample.DopingDensity[:int((Sample.W-67)/Sample.dx)] = 0.0
+	Sample.DopingDensity[1] = 50.0 - sum(Sample.DopingDensity)
+	#print(sum(Sample.DopingDensity))
+	"""
+	#ReadFile
+	#Import(Sample, "InitialConditions")
+	#Import(Sample, "V=0T=200min")
 
-Sample = Init_Sample(Bias,dt,nx)
-"""
-#Change the initial Charge Distribution
-Sample.W = 550
-Sample.DopingDensity[:int((Sample.W-67)/Sample.dx)] = 0.0
-Sample.DopingDensity[1] = 50.0 - sum(Sample.DopingDensity)
-#print(sum(Sample.DopingDensity))
-"""
-#ReadFile
-Import(Sample, "InitialConditions")
+	#OxygenDrift(Sample, 500)
+	Sample.PlotResults()
 
-#OxygenDrift(Sample, 500)
-Sample.PlotResults()
-
-# Voltage fct
-V = []
-for i in range(100):
-	V = V+[i*0.05]
-for i in range(200):
-	V = V+[5-i*0.05]
-for i in range(100):
-	V = V + [-5 + i*0.05]
-V = V + [0]
-
-print(V)
+	"""
+	# Voltage fct
+	V = []
+	for i in range(100):
+		V = V+[i*0.05]
+	for i in range(200):
+		V = V+[5-i*0.05]
+	for i in range(100):
+		V = V + [-5 + i*0.05]
+	V = V + [0]
+	"""
+	"""
+	# Voltage fct
+	V = []
+	for i in range(100):
+		V = V + [i*0.1]
+	V = V + [0]
+	#for i in range(100):
+		#V = V + [5-i*0.1]
+	#V = V + [0]
+	"""
+	V = ones(20)*0
+	
+	Sample.Bias = V[0]
+	#print(V)
+	
 #-------------------------------
-T = 0
-R = []
+	T = 0
+	R = []
 
-# Drift paired with Diffusion
-DiffusionSteps = 1
-DriftIterations = int(1/Sample.dt)
+	# Drift paired with Diffusion
+	DiffusionSteps = 1
+	DriftIterations = int(1/Sample.dt)*10
 
-print("Start")
-for i in range(len(V)) :#fix20 = 20mal Bilder Anzeigen
-	for j in range(DriftIterations) :
-		# Time actualization
-		T = T+dt
-		
-		print("Drift")
-		OxygenDrift(Sample, 1)
-		
-		print("Diffusing")
-		OxygenDiff(Sample, DiffusionSteps, 1)
-		#for h in range(DiffusionSteps) :
-			#Sample.DopingDensity[:20000] = Diffusion(Sample.X[:20000], Sample.dt , Sample.DopingDensity[:20000], 1)
-		
-		[Sample.ChargeDensity, Sample.W]= ReloadDeltaPhi(Sample.X, Sample.DopingDensity, Sample.ChargeDensity, Sample.Phi, Sample.Dieelek, Sample.W, Sample.Bias)
-		
-		#Resistance Calculation
-		R0 = R_1 = R1 = R3 = C = 0
-		# R0 = original density, R_1 = lower, R1 = higher
-		for g in range(nx) :
-			Rho = Sample.DopingDensity[g]
-			if (Rho==u.Titanium_DopingDensity) : R0  = R0  + Sample.dx
-			if (Rho <u.Titanium_DopingDensity) : R_1 = R_1 + Sample.dx
-			if (Rho >u.Titanium_DopingDensity) : R1  = R1  + Sample.dx
-			#R0 = R0 + Sample.dx * Sigma(Sample.DopingDensity[g])
-		C = sum(Sample.ChargeDensity)*Sample.dx
-		R = R +[(T, R0, R_1, R1, C, Sample.W, Sample.Bias)]
-		
-	#print(Sample.Bias)
-	print(i, Sample.W)
-	#Sample.PlotResults()
-	Sample.Bias = V[i]
-	print("New Bias =", Sample.Bias)
-	[Sample.ChargeDensity, Sample.W]= ReloadDeltaPhi(Sample.X, Sample.DopingDensity, Sample.ChargeDensity, Sample.Phi, Sample.Dieelek, Sample.W, Sample.Bias)
-Sample.PlotResults()
+	print("Start")
+	for i in range(len(V)) :#fix20 = 20mal Bilder Anzeigen
+		for j in range(DriftIterations) :
+			# Time actualization
+			T = T+dt
+			
+			print("Drift")
+			Sample.Phi[0] = Sample.Bias - u.BarrierHeight
+			solverLU_backward(Sample)
+			ReloadDeltaPhi(Sample)
+			solverLU_backward(Sample)
+			OxygenDrift(Sample, 1)
+			
+			#print("Diffusing")
+			#OxygenDiff(Sample, DiffusionSteps, 1)
+			#for h in range(DiffusionSteps) :
+				#Sample.DopingDensity[:20000] = Diffusion(Sample.X[:20000], Sample.dt , Sample.DopingDensity[:20000], 1)
+			
+			#[Sample.ChargeDensity, Sample.W]= ReloadDeltaPhi(Sample.X, Sample.DopingDensity, Sample.ChargeDensity, Sample.Phi, Sample.Dieelek, Sample.W, Sample.Bias)
+			
+			#Resistance Calculation
+			R0 = R_1 = R1 = R3 = C = 0
+			# R0 = original density, R_1 = lower, R1 = higher
+			for g in range(nx) :
+				Rho = Sample.DopingDensity[g]
+				if (Rho==u.Titanium_DopingDensity) : R0  = R0  + Sample.dx
+				if (Rho <u.Titanium_DopingDensity) : R_1 = R_1 + Sample.dx
+				if (Rho >u.Titanium_DopingDensity) : R1  = R1  + Sample.dx
+				#R0 = R0 + Sample.dx * Sigma(Sample.DopingDensity[g])
+			C = sum(Sample.ChargeDensity)*Sample.dx
+			R = R +[(T, R0, R_1, R1, C, Sample.W, Sample.Bias)]
+			del R0, R_1, R1, R3, C
+		#print(Sample.Bias)
+		print(sum(Sample.DopingDensity), T)
+		print(i, Sample.W)
+		Sample.PlotResults()
+		Sample.Bias = V[i]
+		print("New Bias =", Sample.Bias)
+		ReloadDeltaPhi(Sample)
+	Sample.PlotResults()
 
-savetxt("Resistance-1", R , newline="\n")
-print(R)
+	savetxt("Resistance5-5V(0)", R , newline="\n")
+	#print(R)
 
-WriteToFile(Sample, "RisingV0--5")
+	WriteToFile(Sample, "V=5-5(0)")
 
-plt.show()
-
-"""
-N0 = deepcopy(Sample.DopingDensity)
-
-n = 100000
-#Sample.Diffusion(3, 1)
-for i in range(n):
-	Sample.DopingDensity[:5000] = Diffusion(Sample.X[:5000],Sample.dt, Sample.DopingDensity[:5000], 1)
-#def Diffusion(X, dt, DopingDensity, DiffusionCoeffcient):
-
-# Diffusion Info
-print(amax(Sample.DopingDensity), mean(Sample.DopingDensity))
-print(n)
-print(sum(N0),sum(Sample.DopingDensity),sum(N0)-sum(Sample.DopingDensity))
-print(sum(N0[:5]), sum(Sample.DopingDensity[:5]))
-print(sum(N0[5:300]), sum(Sample.DopingDensity[5:300]))
-
-plt.figure("Diffusion")
-plt.plot(Sample.X, N0, color = "Black")
-plt.plot(Sample.X, Sample.DopingDensity, color = "Red")
-"""
-#savetxt("Solution", (Sample.Phi, Sample.DopingDensity, Sample.ChargeDensity))
+	plt.show()
+	return 0
+	
+if __name__ == '__main__':
+	Run(0, 1, 50001)
