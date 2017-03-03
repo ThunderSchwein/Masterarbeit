@@ -35,128 +35,57 @@ def ReloadFermi(X, DopingDensity, Potential, ElectricField ,FermiLevel = 0):
 	
 	return ChargeDensity
 
-def ReloadDeltaPhi(X, DopingDensity, ChargeDensity, Potential, Dieelek, W, FermiLevel = 0) :
+def ReloadDeltaPhi(Sample) :
 	#print("Redistributing the Electrons")
-	nx = len(X)
-	# Detemining the ruling Potential
-	Phi2 = zeros(len(X))
-	Phi2[-1] = Phi2[-2] = 0
-	Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
+	nx = Sample.nx
+	Phi2 = Sample.Phi
 	
-	ChargeDensity[:] = 0
+	Sample.ChargeDensity = zeros(nx)
 	
-	if(FermiLevel > -u.BarrierHeight):
-		DepletionRegionCharge = u.Titanium_InversionCharge
-		factor1 = 1/1.003
-		factor2 = 1/1.0015
-		factor3 = 1/1.00075
-		factor4 = 1/1.00015
-		
-		ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*DepletionRegionCharge
-		Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-		
-		while (Phi2[0]>(u.BarrierHeight*0.995+FermiLevel)):
-			W = W*factor1
-			ChargeDensity[:] = 0
-			ChargeDensity[:int(W/u.DeviceLength*nx)] = u.Titanium_InversionDensity*DepletionRegionCharge
-			Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-			#print(1, W, Phi2[0])
-		while (Phi2[0]<(u.BarrierHeight*1.01+FermiLevel)):
-			W = W / factor2
-			ChargeDensity[:] = 0
-			ChargeDensity[:int(W/u.DeviceLength*nx)] = u.Titanium_InversionDensity*DepletionRegionCharge
-			Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-			#print(2, W, Phi2[0])
-			
-		while (Phi2[0]>(u.BarrierHeight*0.995+FermiLevel)):
-			W = W*factor3
-			ChargeDensity[:] = 0
-			ChargeDensity[:int(W/u.DeviceLength*nx)] = u.Titanium_InversionDensity*DepletionRegionCharge
-			Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-			#print(3, W, Phi2[0])
-		while (Phi2[0]<(u.BarrierHeight*1.01+FermiLevel)):
-			W = W /factor4
-			ChargeDensity[:] = 0
-			ChargeDensity[:int(W/u.DeviceLength*nx)] = u.Titanium_InversionDensity*DepletionRegionCharge
-			Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-			#print(4, W, Phi2[0])		
-	else: 
+	if(Sample.Bias < abs(u.BarrierHeight)):
 		DepletionRegionCharge = u.Titanium_DopingCharge
 		factor1 = 1.003
 		factor2 = 1.0015
 		factor3 = 1.00075
 		factor4 = 1.00015
 		
-		ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*DepletionRegionCharge
-		Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
+		# Inital Guess
+		#Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
+		solverLU_backward(Sample)
 		
-		while (Phi2[0]>(u.BarrierHeight*0.995+FermiLevel)):
-			W = W*factor1
-			ChargeDensity[:] = 0
-			ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*DepletionRegionCharge
-			Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
+		# Improvement of Initial Guess
+		while (Phi2[0]>(u.BarrierHeight*0.995+Sample.Bias)):
+			Sample.W = Sample.W*factor1
+			Sample.ChargeDensity[:] = 0
+			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
+			solverLU_backward(Sample)
 			#print(1, W, Phi2[0])
-		while (Phi2[0]<(u.BarrierHeight*1.01+FermiLevel)):
-			W = W / factor2
-			ChargeDensity[:] = 0
-			ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*DepletionRegionCharge
-			Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
+		while (Phi2[0]<(u.BarrierHeight*1.005+Sample.Bias)):
+			Sample.W = Sample.W / factor2
+			Sample.ChargeDensity[:] = 0
+			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
+			solverLU_backward(Sample)
 			#print(2, W, Phi2[0])
 			
-		while (Phi2[0]>(u.BarrierHeight*0.995+FermiLevel)):
-			W = W*factor3
-			ChargeDensity[:] = 0
-			ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*DepletionRegionCharge
-			Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
+		while (Phi2[0]>(u.BarrierHeight*0.999+Sample.Bias)):
+			Sample.W = Sample.W*factor3
+			Sample.ChargeDensity[:] = 0
+			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
+			solverLU_backward(Sample)
 			#print(3, W, Phi2[0])
-		while (Phi2[0]<(u.BarrierHeight*1.01+FermiLevel)):
-			W = W /factor4
-			ChargeDensity[:] = 0
-			ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*DepletionRegionCharge
-			Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-			#print(4, W, Phi2[0])		
+		while (Phi2[0]<(u.BarrierHeight*1.001+Sample.Bias)):
+			Sample.W = Sample.W /factor4
+			Sample.ChargeDensity[:] = 0
+			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
+			solverLU_backward(Sample)
+			#print(4, W, Phi2[0])
+		del DepletionRegionCharge
+	else:
+		Sample.W = u.Titanium_FreePathLength
+		Potential[0] = Sample.Bias - u.BarrierHeight
+		Sample.ChargeDensity = zeros(nx)
 		
 	#print(0, W, Phi2[0])
 	
-	return [ChargeDensity, W]
-	
-	"""
-	W = (2*(u.Titanium_DielectricityFactor*u.e0)*abs(u.BarrierHeight*2-Phi2[0]2)/(u.Titanium_DopingCharge*u.Titanium_DopingDensity))**.5	
-	ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
-	Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-	print(1, W, Phi2[0], u.BarrierHeight*3-Phi2[0]*2)
-	W = (2*(u.Titanium_DielectricityFactor*u.e0)*abs(u.BarrierHeight*3-Phi2[0]*2)/(u.Titanium_DopingCharge*u.Titanium_DopingDensity))**.5	
-	ChargeDensity[:int(W/u.DeviceLength*nx)] = DopingDensity[:int(W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
-	Phi2 = solverLU_backward(X, Phi2, ChargeDensity, Dieelek)
-	#ChargeDensity[:int((W+34)/u.DeviceLength*nx)] = DopingDensity[:int((W+34)/u.DeviceLength*nx)]*u.Titanium_DopingCharge
-	print(2, W, Phi2[0]) #,int(W/u.DeviceLength*nx), u.BarrierHeight*2-Phi2[0], solverLU_backward(X, Phi2, ChargeDensity, Dieelek)[0])	
-	"""
-	
-
-"""
-#-----------------------------------
-# Depletion Region Width Correction
-
-plt.figure()
-
-plt.plot(X, Phi, color = "red")
-DP = ones(nx)*u.Titanium_DopingDensity
-#DP[:int(0.2*nx)] = 1
-plt.plot(X, Phi, color= "Black")
-Rho2 = zeros(nx)
-W2 = W/0.962
-n3 = zeros(nx)
-#Rho2[:int(W2/u.DeviceLength*nx)] = -u.Titanium_DopingCharge*u.Titanium_DopingDensity
-#Phi[0] = u.BarrierHeight; Phi[-1] = 0.0
-n0 = (1-exp(-Phi/(u.Kb*300)))*u.Titanium_DopingDensity*(-u.Titanium_DopingCharge)
-#n3[1:] = (1-exp(-Phi[:-1]/(u.Kb*1e-10)))*u.Titanium_DopingDensity*(-u.Titanium_DopingCharge)
-n3 = ReloadFermi(X, DP, Phi)
-Phi2 = solverLU_backward(X, Phi, n0, Dieelek)
-#n0[DP == 0] = 0
-plt.plot(X, n0, color = "Purple")
-plt.plot(X, n3, color = "blue" )
-plt.plot(X, Rho, color = "green")
-
-#Phi2 = solverLU_backward(X, Phi, n0, Dieelek)
-#plt.plot(X, Phi2)
-"""
+	Sample.E = E_Field(Sample.X, Sample.Phi, Sample.E)
+	return
