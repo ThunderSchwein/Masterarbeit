@@ -28,31 +28,37 @@ def solverLU(X, Phi, Rho, Dieelek):
 	Phi = Phi + (Phi_ende-Phi[-1])*(X-X[0])/(X[-1]-X[0])
 	return Phi
 
-def E_Field(X, Phi):
+def E_Field(X, Phi, E):
 	dx = X[1]-X[0]
 	E = deepcopy(X)
-	for i in range(len(Phi)-1) :
-		E[i+1] = (Phi[i+1] - Phi[i])/dx
+	for i in range(len(X)-1) :
+		E[i+1] = (Phi[i] - Phi[i+1])/dx
 	E[0] = E[1]
 	
 	return E
 	
-def solverLU_backward(X, Phi, Rho, Dieelek):
-	dx = X[1]-X[2]
-	n = len(Phi)
+def solverLU_backward(Sample):
+	dx = Sample.dx
+	nx = Sample.nx
+	Phi = Sample.Phi
+	Rho = Sample.ChargeDensity
 	
-	Rho2 = zeros(len(X)-1)
-	for i in range(len(X)-1) :
-		Rho2[i] = (Rho[i+1] + Rho[i])/2
-		
-	for j in range(len(Phi)-2):
-		Phi[n-3-j] = 2*Phi[n-j-2] - Phi[n-j-1] - Rho2[n-j-2]*dx**2/Dieelek[n-j-2]
-	
-	return Phi
+	if(Phi[0] > abs(u.BarrierHeight)):
+		for i in range(nx):
+			Phi[i] = Phi[0] - (Phi[0]-Phi[-1]) * i/(nx-1)
+	else :
+		Rho2 = zeros(nx-1)
+		Phi[-1] = Phi[-2] = 0
+		for i in range(nx-1) :
+			Rho2[i] = (Rho[i+1] + Rho[i])/2
+			
+		for j in range(len(Phi)-2):
+			Phi[nx-3-j] = 2*Phi[nx-j-2] - Phi[nx-j-1] - Rho2[nx-j-2]*dx**2/Sample.Dieelek[nx-j-2]
+			
+		del Rho2
+	return
 	
 #-----------------------------------------------------------
-
-
 
 
 """
