@@ -52,7 +52,7 @@ def DriftRK(Sample, DriftAmount = 1.0):
 			DP[i] = DP[i] - Sample.DopingDensity[i]*DriftAmount
 	# Depositing the Doping at the new Position
 			DP[k]  = DP[k] + Sample.DopingDensity[i]*DriftAmount*(1-k0%1)
-			DP[k-sign(k0)]  = DP[k-sign(k0)] + Sample.DopingDensity[i]*DriftAmount*(k0%1)					
+			DP[k+1]  = DP[k+1] + Sample.DopingDensity[i]*DriftAmount*(k0%1)					
 			del k0, k1, k2, k3, k4, k, DriftAmount
 	#del dx, nx, E
 	Sample.DopingDensity = DP+Sample.DopingDensity
@@ -87,34 +87,3 @@ def Diffusion(X, dt, DopingDensity, DiffusionCoeffcient):
 		#DP_neu[i+2] = (1-s)*DP[i+2] - s*(DP[i]-2*DP[i+1]-2*DP[i+3]+DP[i+4])/2
 		
 	return DP_final
-
-"""
-def Drift ( X , Potential, DopingDensity, dt):
-	Phi = Potential
-	#Rho = ChargeDensity
-	#Di = Dielectricity1D
-	DP = zeros(len(DopingDensity))
-	
-	E = E_Field(X, Phi)
-	dx = X[1]-X[0]
-	
-	for i in range(1, len(DP)):
-		if (DopingDensity[i] != 0) & (abs(E[i]) > 4e-4) :
-			DP[i] = DP[i] - DopingDensity[i]/2
-			
-			
-			#DP[i+int(sign(E[i]))] = DP[i+int(sign(E[i]))] + DP[i]/2
-			#DP[i+10] = DP[i+10] + DopingDensity[i]/2
-			
-			#k=1
-			
-			k = i+int(-E[i]*u.Titanium_DopingMobility/dx*dt)
-			#f = k%1-0.5
-			
-			DP[k-1] = DP[k-1] + DopingDensity[i]/8
-			DP[k]   = DP[k] + DopingDensity[i]/4
-			DP[k+1] = DP[k+1] + DopingDensity[i]/8
-			
-			# include Gaussian Statistics
-	return (DP+DopingDensity)
-"""
