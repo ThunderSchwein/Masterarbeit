@@ -38,54 +38,55 @@ def ReloadFermi(X, DopingDensity, Potential, ElectricField ,FermiLevel = 0):
 def ReloadDeltaPhi(Sample) :
 	#print("Redistributing the Electrons")
 	nx = Sample.nx
-	Phi2 = Sample.Phi
+	#Phi2 = Sample.Phi
 	
 	Sample.ChargeDensity = zeros(nx)
 	
 	if(Sample.Bias < abs(u.BarrierHeight)):
-		DepletionRegionCharge = u.Titanium_DopingCharge
-		factor1 = 1.003
-		factor2 = 1.0015
-		factor3 = 1.00075
-		factor4 = 1.00015
+		#DepletionRegionCharge = u.Titanium_DopingCharge
+		factor1 = 1.005
+		factor2 = 1.001
+		factor3 = 1.0002
+		factor4 = 1.00004
 		
 		# Inital Guess
 		#Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
-		solverLU_backward(Sample)
+		solverLU(Sample)
 		
 		# Improvement of Initial Guess
-		while (Phi2[0]>(u.BarrierHeight*0.995+Sample.Bias)):
+		while (Sample.Phi[0]>(u.BarrierHeight+Sample.Bias)):
 			Sample.W = Sample.W*factor1
-			Sample.ChargeDensity[:] = 0
-			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
-			solverLU_backward(Sample)
-			#print(1, W, Phi2[0])
-		while (Phi2[0]<(u.BarrierHeight*1.005+Sample.Bias)):
+			#Sample.ChargeDensity[:] = 0.0
+			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
+			solverLU(Sample)
+			#print(1, Sample.W, Sample.Phi[0])
+		while (Sample.Phi[0]<(u.BarrierHeight+Sample.Bias)):
 			Sample.W = Sample.W / factor2
-			Sample.ChargeDensity[:] = 0
-			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
-			solverLU_backward(Sample)
-			#print(2, W, Phi2[0])
+			Sample.ChargeDensity[:] = 0.0
+			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
+			solverLU(Sample)
+			#print(2, Sample.W, Sample.Phi[0])
 			
-		while (Phi2[0]>(u.BarrierHeight*0.999+Sample.Bias)):
+		while (Sample.Phi[0]>(u.BarrierHeight*0.99875+Sample.Bias)):
 			Sample.W = Sample.W*factor3
-			Sample.ChargeDensity[:] = 0
-			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
-			solverLU_backward(Sample)
-			#print(3, W, Phi2[0])
-		while (Phi2[0]<(u.BarrierHeight*1.001+Sample.Bias)):
+			#Sample.ChargeDensity[:] = 0.0
+			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
+			solverLU(Sample)
+			#print(3, Sample.W, Sample.Phi[0])
+		while (Sample.Phi[0]<(u.BarrierHeight*1.00125+Sample.Bias)):
 			Sample.W = Sample.W /factor4
 			Sample.ChargeDensity[:] = 0
-			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
-			solverLU_backward(Sample)
-			#print(4, W, Phi2[0])
-		del DepletionRegionCharge
+			Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
+			solverLU(Sample)
+			#print(4, Sample.W, Sample.Phi[0])
+		#del DepletionRegionCharge
 	else:
 		Sample.W = u.Titanium_FreePathLength
-		Potential[0] = Sample.Bias - u.BarrierHeight
-		Sample.ChargeDensity = zeros(nx)
+		Sample.Phi[0] = Sample.Bias + u.BarrierHeight
+		#Sample.ChargeDensity = zeros(nx)
+		Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
+		solverLU(Sample)
 		
 	#print(0, W, Phi2[0])
-	
 	Sample.E = E_Field(Sample.X, Sample.Phi, Sample.E)
 	return
