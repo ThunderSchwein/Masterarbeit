@@ -47,17 +47,21 @@ class Schottky(object) :
 		#Initial Potential Calculation
 		self.Phi = zeros(nx)
 		self.Phi[1] = self.Phi[0] = u.BarrierHeight+self.Bias; self.Phi[-1] = 0
-		solverLU_backward(self)
-
+		solverLU(self)
+		
 		#Electrical Field
 		self.E = zeros(nx)
 		self.E = E_Field(self.X, self.Phi, self.E)
 		
+		# Hydrogen Concentration
+		self.Hydrogen = zeros(nx)
+		self.H2Concentration = 0
+		
 		# Inital conditions Plot
-		plt.figure("Initial Conditions")
-		plt.plot(self.X, self.ChargeDensity)
-		plt.plot(self.X, self.Phi,color = "G")
-		plt.plot(self.X, self.E, color = "R")
+		#plt.figure("Initial Conditions")
+		#plt.plot(self.X, self.ChargeDensity)
+		#plt.plot(self.X, self.Phi,color = "G")
+		#plt.plot(self.X, self.E, color = "R")
 		return
 	#------------------------------------
 	def DopingDrift(self):
@@ -65,26 +69,39 @@ class Schottky(object) :
 		DriftRK(self)
 		ReloadDeltaPhi(self)
 		self.Phi[-1] = 0.0; self.Phi[-2] = 0.0
-		solverLU_backward(self)
+		solverLU(self)
 		return
 		
 	def PlotResults(self):
-		plt.figure("Oxygen Vacancy Movement")
+		plt.figure("Charge & Doping Distribution")
 		
-		plt.plot(self.X, self.DopingDensity, color = "Grey")
-		plt.plot(self.X, self.ChargeDensity, color = "Red")
-
+		plt.xlabel("X [nm]")
+		plt.ylabel("Concentration [1/nm^3]")
+		
+		P1, = plt.plot(self.X, self.DopingDensity, color = "Grey", label = "Doping Density")
+		P2, = plt.plot(self.X, self.ChargeDensity, color = "Red" , label = "Charge Density")
+		P3, = plt.plot(self.X, self.Hydrogen	 , color = "Blue", label = "Incorporated Hydrogen Density")
+		plt.legend()
+		
 		plt.figure("Potentials")
 		
+		plt.xlabel("X [nm]")
+		plt.ylabel("Potential / Electrical Field / Doping Concentration")
 		self.Phi[1] = self.Phi[0] = (u.BarrierHeight+self.Bias); self.Phi[-1] = 0.0
-		self.Phi = solverLU(self.X, self.Phi, self.ChargeDensity, self.Dieelek)
-		plt.plot(self.X, self.Phi, color = "Green")
+		solverLU(self)
 		
-		plt.plot(self.X, self.E, color = "Blue")
-		plt.plot(self.X, self.DopingDensity, color = "Grey")
-
-		solverLU_backward(self)
-		plt.plot(self.X, self.Phi, color = "Red")
+		P4, = plt.plot(self.X, self.Phi, color = "Green", label = "Potential [V]")
+		P5, = plt.plot(self.X, self.E  , color = "Blue" , label = "Electrical Field [V/nm]")
+		
+		P6, = plt.plot(self.X, self.DopingDensity, color = "Grey", label = "Doping Density [1/nm^3]")
+		plt.legend()
+		
+		plt.figure("Doping Density")
+		
+		plt.xlabel("X [nm]")
+		plt.ylabel("Doping Concentration")
+		P6, = plt.plot(self.X, self.DopingDensity, color = "Grey", label = "Oxygen Vacancy Density [1/nm^3]")
+		plt.legend()
 		
 		plt.show()
 		
