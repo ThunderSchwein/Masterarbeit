@@ -9,9 +9,10 @@ import Schottky as S
 from Run import Init_Sample, Import
 
 Sample = Init_Sample(0, 1, 50001)
+#Import(Sample, "V=10-10(1)T=2000s")
 Import(Sample, "V=0T=200min")
 Sample.PlotResults()
-
+"""
 D =  loadtxt("Resistance0")
 #[(T, R0, R_1, R1, C, Sample.W)]
 #print(D)
@@ -24,6 +25,7 @@ R1  = D[:,3]
 C   = D[:,4]
 W   = D[:,5]
 V   = D[:,6]
+
 
 plt.figure("Resistance")
 
@@ -41,5 +43,5 @@ plt.plot(T, C)
 plt.plot(T, W)
 plt.figure("Mott-Schottky")
 plt.plot(V, 1/(C*C))
-
+"""
 plt.show()
