@@ -9,6 +9,7 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{float}
+\usepackage{wrapfig}
 %\usepackage{adjustbox}
 %\usepackage{subscript}
 \author{Konstantin Murasov} 
@@ -67,58 +68,91 @@ Abgabedatum : 29 Juni 2016\\
 %- Frank Herbert, Die Ordensburg des Wüstenplaneten}
 %\end{flushright}
 
-\normalsize	
+\normalsize
+		\section{Summary}
+		\label{sec:Summary}
+		The aim of the present work is to simulate the memristic and sensory behaviour of a semiporous Titaniumdioxide. Though some models have been introduced \cite{Achhab, Strungaru, Missing}, none of them took into account the Schottky-Diode like properties of the Platinum-$TiO_2$-interface. The experimental date, which were used to model the I-V-characteristics, where taken mainly from Strungaru's et al. paper \cite{Strungaru}.\\
+		The text body is divided as follows : First, the concepts of a memristor and electroforming are introduced. After that the properties of Titaniumdioxide and the means of its production are explained. Then, the work principle of a Schottky-Diode are referred to. A discussion of previous works in hindsight of useful information for the simulation follows that part of the work. After that the methods used in the simulation are explained, followed by the simulation results. This is rounded up by a short conclusion.
+
+\newpage
 		\section{Memristor}
 		\label{sec:Memristor}
-	In 1971 Leon Chua proposed a new passive circuit element, which changes its properties depending upon the cumulative amount of charge flowing through it - the memristor\cite{Missing}. The desired properties of a memristor were later found in nanoscale systems, which exhibited doping ion migration \cite{Missing}. Furthermore Strukov et al.\cite{Missing} state that "no combination of nonlinear resistive, capacitive and inductive components can duplicate the circuit properties of a nonlinear memristor". They also provide a simple (mathematical)
-model for resistance switching in a memristive circuit element :
-
+	In 1971 Leon Chua proposed a new passive circuit element, which changes its properties depending upon the cumulative amount of charge flowing through it - the memristor \cite{Missing}. The desired properties of a memristor were later found in nanoscale systems, which exhibited doping ion migration. Furthermore Strukov et al. \cite{Missing} state that "no combination of nonlinear resistive, capacitive and inductive components can duplicate the circuit properties of a nonlinear memristor". They also provide a simple model for resistance switching in a memristive circuit element :
+\begin{figure}[H]
+	\centering
+		\includegraphics{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/Doped.png}
+	\label{fig:Doped}
+	\caption{The model of resistive switching, as proposed in \cite{Missing}: equivalent circle (left) and scheme of a sample (right). $\omega$ is the state variable, reflecting the fraction of device length,which experiences a increased concentration of doping ions.}
+\end{figure}
 For a given sample of the length D, with a doped region of low resistivity \(R_{ON}\) of the width $\omega$ and an undoped region of high resistivity \(R_{OFF}\) of the width \(D-\omega\) the total resistivity is : 
 
 \begin{equation}
-R(W) = R_{ON}\cdot\omega+R_{OFF}\cdot(D-\omega)
+R_{total} = R_{ON}\frac{\omega}{D}+R_{OFF}(1-\frac{\omega}{D})
 \end{equation} 
 Assuming an average doping ion mobility $\mu$ leads to :
-\begin{equation}
-\frac{d\omega (t)}{dt} = \mu \frac{R_{ON}}{D}i(t),
-\end{equation}
+\begin{align*}
+\frac{d\omega (t)}{dt} &= \mu E(\omega) \\
+											 &= \mu \frac{dU}{dx}|_{x = \omega} \\
+											 &= \mu U\frac{R_{ON}\frac{\omega}{D}}{R_{total}}/ \omega \\
+											 &= \mu I\frac{R_{ON}}{D}
+\end{align*}
 and thus :
 \begin{equation}
 \omega (t) = \mu \frac{R_{ON}}{D}q(t).
 \end{equation}
 
-\begin{figure}[htb]
-	\centering
-		\includegraphics{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/Doped.png}
-	\label{fig:Doped}
-	\caption{The model of resistive sitching, as proposed in \cite{Missing}: equivalent circle (left) and scheme of a sample (right). $\omega$ is the state variable, reflecting the fraction of device length,which experiences a increased concentration of doping ions.}
-\end{figure}
-
-
-%"Important applications include unltradense, semi-non-volatile memories and lerning networks that require a synapse-like function"\cite{missing}.
-
-\section{Titaniumdioxide}
-	Titaniumdioxide is a metal-oxide with semiconductor-like properties, which is susceptible to electroforming due to migration of Oxygen vacancies, which act as donors \cite{Effect, Strungaru}. Due to this effect and its wide availability, Titaniumdioxide invokes a high interest in various research fields such as nanoelectronics, photovoltaics and gas sensing \cite{Strungaru, Dynamics}.
-	In its stoichometric form $TiO_2$ possesses insulating properties. However, introduction of Oxygen vacancies improves the conductance, since they act as donors \cite{Strungaru}. In sufficient high electric fields, the vacancies are filled by neighboring Oxygen atoms, creating the impression of a moving, +2-charged vacancy \cite{Missing}. The Titaniumdioxide containing the vacancies is denoted as $TiO_{2-\delta}$. Though the root idea is clear, the whole mechanism is still not well understood, because the examined devices also express non-linear electronic properties, which make the effects of electroforming less apparent \cite{Family}.
-	
-	The samples used in our workgroup are prepared via plasma electrolytic oxidation. In this procedure a Titanium foil of 0.4 mm thickness is submerged in sulfuric acid solution and set under voltages up to 200 V \cite{Titan1}. Under this conditions the oxide passivization layer on top of Titanium undergoes a electrochemical transformation: since the passivization layer is a insulator, the current seeks the path of least resistance through microscopic weak-spots in the oxide layer, created by the acid. When such a weak-spot emerges, it is forced to support a current of $\approx$ 200 mA.
-	The direct result of the large current density is the splitting of water molecules into Oxygen and Hydrogen ions, which instantly achieve plasma state due to the same current that produced them. The plasma reaches temperatures up to 40000 K \cite{Titan2} and heats the metal, while simultaneously evaporating the acid solution. The escaping water vapor shapes the Titanium, while the Oxygen ions from the plasma deposit themselves on top of it, sealing it against the acid and raising the electrical resistance at the site of the discharge \cite{Titan2}.
-	The result is the formation of microscopic cavities, which consist of Titaniumdioxide. Growing on top of each other, they create a porous network on top of the metal. It is reported, that higher voltages lead to bigger pores, while the depth of the $TiO_2$ layer correlates with the duration of voltage application. In \cite{Dynamics} the reported depth value is 5 $\mu$m, which has been used in following simulations.
-	
-	%The  implementation of Titaniumdioxide as a circuit element is based on its hysteretic behaviour $d\vec{ue}$ to migration of Oxygen defects, which act as donors [Quelle]. The gas 
+The state variable $\omega$ rules the total resistance of the circuit element by determining the ratio between low and high resistance patches of the memristor. This allows for creation of circuit elements, which act differently depending upon the charge, which has passed it.
+The applications range from electronic memory devices to circuits with synapse-like properties \cite{Missing}.
 
 \subsection{Electroforming}
-	The term electroforming describes a process, when an application of high voltage or current changes the conductivity of the material\cite{Effect}. In Titaniumdioxide this occurs due to migration of Oxygen defects. If the movement of doping ions is not uniform along the cross-section of the semiconductor, formation of conductive channels inside of insulating Titaniumdioxide-matrix \cite{Effect}. It is also notable, that a strong positive voltage is able to ionize Oxygen atoms, setting it free and thus creating additional vacancies \cite{Effect, }Quelle ??.
-	HYSTERETIC
+%\begin{wrapfigure}[Zeile]{Position}[r]{width=0.5\textwidth}
+\begin{wrapfigure}[19]{h}[0cm]{7cm}
+  \includegraphics{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/Drift.png}
+	\caption{Drift of Oxygen defects in an applied electric field and corresponding change in conductivity behavior at a $Pt-TiO_2$-interface. Taken from \cite{Family}.}
+	\label{fig:Drift}
+\end{wrapfigure}
+	The term electroforming describes a process, when an application of high voltage or current changes the conductivity of the material \cite{Effect}. In Titaniumdioxide this occurs due to migration of Oxygen defects. If the movement of doping ions is not uniform along the cross-section of the semiconductor, formation of conductive channels inside of insulating Titaniumdioxide-matrix takes place \cite{Effect}. It is also notable, that a strong positive voltage is able to ionize Oxygen atoms, setting them free and thus creating additional vacancies \cite{Effect}, while Oxygen present in the atmosphere is able to partially heal the defects, even at temperatures of 170 K \cite{Achhab}.
 	
-	\begin{figure}[htb]
+	Assuming that a change of $\omega$ requires a minimal energy, a tunable resistance element can be realized : while operating in a lower voltage range, it can be modified applying a voltage above the electroforming threshold voltage. This option is especially interesting in the field of micro- and nanoelectronics, where even low voltages can yield sufficiently strong electric fields \cite{Missing}.\\
+
+
+\section{Titaniumdioxide}
+	Titaniumdioxide is a metal-oxide with semiconductor properties, which is susceptible to electroforming due to migration of Oxygen vacancies, which act as donors \cite{Effect, Family}. In crystalline form it is a wide gap ($\approx 3 eV$) semiconductor, but in presence of Oxygen defects the resistance is lowered as non-stoichiometric ($Ti_xO_{2n-1}$) phases arise, since their conductance is by orders of magnitude better \cite{Etching}. In that sense it is widely accepted that Oxygen vacancies act as n-type donors \cite{Strungaru, Achhab, Etching}. In sufficient high electric fields, this vacancies are filled by neighboring Oxygen atoms, creating the impression of a moving, +2-charged vacancy \cite{Missing}. Though the root idea is clear, the whole mechanism is still not well understood, because the examined devices also express non-linear electronic properties, which make the effects of electroforming less apparent \cite{Family}.\\
+	Since it is non-toxic, corrosion-resistant and bio-compatible, it is already implemented in medicine for prosthetics and implants. At the same time, its electronic and electrochemical properties like decomposition of organic material under UV illumination, photovoltaic and sensory activities invoke further research interest for this compound \cite{Etching}. Due to unique effects and new geometries (multiplication of surface, surface reconstruction or effects due to surface curvature) the nanoscale $TiO_2$ has attracted a lot of attention, mostly in its nanorod or nanotube form \cite{Etching}.\\
+	On the other hand, porous Titaniumdioxide has a lot of potential due to its large surface, which is especially important in the photovoltaic and sensory applications \cite{Achhab, Etching}. The random structure of the nanoporous substance, however, bears the disadvantage of bad reproductivity, which is the reason that a number of samples must be inspected to yield a general statement about its properties. Because of this a numerical approach offers a great opportunity to understand the processes inside this compound, by trying to recreate the experimental values. This way we hope to be able to explain and predict the outcome of future experiments.
+	
+	%Due to this effect and its wide availability, Titaniumdioxide invokes a high interest in various research fields such as nanoelectronics, photovoltaics and gas sensing \cite{Strungaru, Dynamics}.	
+	
+\subsection{Fabrication of $TiO_2$}
+	\label{sec:Fabrication}
+	The samples used in our workgroup are prepared via plasma electrolytic oxidation. In this procedure a Titanium foil of 0.4 mm thickness is submerged in sulfuric acid solution and set under voltages up to 200 V \cite{Titan1}. In this experimental arrangement, Titanium takes the place of the Anode, while a Graphite rod is the cathode. A naturally present passivization layer on top of Titanium inhibits the flow of electrons across the metal-acid interface. In this case two electrochemical processes are in competition : the disintegration of the metal by the acid and the oxidation of the exposed Titanium by the Oxygen from water  molecules  present in the acid solution \cite{Achhab, Etching}. The application of external voltage allows us to manipulate the rates at which this processes occur, granting control over the resulting structures (see figure \ref{fig:Etching}).
+	
+	\begin{figure}[p]
 		\centering
-			\includegraphics{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/Drift.png}
-		\caption{Titanoxid}
-		\label{fig:Drift}
+			\includegraphics{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/Etching.png}
+		\caption{The electrochemical anodization.  I) metal electropolishing, II) formation of compact oxide layer, III) self-ordered oxides (nanotubes or nanopores), IV) rapid (disorganized) oxide nanotube formation, V) ordered nanoporous layers. RBA = Rapid-Breakdown Anodization. Figure taken from \cite{Etching}.}
+		\label{fig:Etching}
 	\end{figure}
 	
+	In fact, the conditions can be created in a way, that a microscopic plasma is ignited on top of Titanium.	Under this conditions the oxide passivization layer on top of Titanium undergoes a electrochemical transformation: since the passivization layer is a insulator, the current seeks the path of least resistance through microscopic weak-spots in the oxide layer, created by the acid. When such a weak-spot emerges, it is forced to support a current of $\approx$ 200 mA.	The direct result of the large current density is the splitting of water molecules into Oxygen and Hydrogen ions at the Titanium surface, which instantly achieve plasma state. The plasma reaches temperatures up to 70000-10000 K \cite{Achhab} and heats the metal, while simultaneously evaporating the acid solution. The escaping water vapor and Hydrogen gas shape the liquid Titanium, while the Oxygen ions from the plasma deposit themselves on top of it, sealing it against the acid and raising the electrical resistance at the site of the discharge, thus ending the reaction \cite{Achhab}. % Rapid Breakdown Anodization \cite{Etching}
+ The result is the formation of microscopic cavities, which consist of Titaniumdioxide. Growing on top of each other, they create a porous network on top of the metal (see Figure \ref{fig:Morphology}). It is reported, that higher voltages lead to bigger pores, while the depth of the $TiO_2$ layer correlates with the duration of voltage application \cite{Achhab, Etching}.% In \cite{Dynamics} the reported depth value is 5 $\mu$m, which has been used in following simulations.
+	Though it is counter-intuitive to prefer such structures to the well-organized nanotubes, they posses advantages such as a higher surface area and stronger adhesion to the substrate Titanium surface \cite{Etching}. While the first is an advantage regarding photovoltaic and sensing applications, the latter is important for the durability of sample.
+	
+	%(Oxygen from water, which are crucially important due to this effect)
+
+	% 'The main disadvantage is that the tubes are not well-defined regarding length distribution, not well-organizedover large surface areas, and they are hardly connected to the substrate'	%\cite{Etching} less-organized 
+	
+\begin{figure}[hbp]
+	\centering
+		\includegraphics{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/Morphology.png}
+	\caption{Morphology of Titaniumdioxide after 'micro-plasma oxidation'(MPO)-Process. Letters indicate pores of different sizes. Taken from \cite{Achhab}.}
+	\label{fig:Morphology}
+\end{figure}
+
+	%The  implementation of Titaniumdioxide as a circuit element is based on its hysteretic behaviour $d\vec{ue}$ to migration of Oxygen defects, which act as donors [Quelle]. The gas 
+	
 \section{Schottky Diode}
+	\label{sec:Schottky}
 
 \begin{figure}[htb]
 	\centering
@@ -130,10 +164,10 @@ and thus :
 	The current through a metal-semiconductor interface depends upon the energy necessary to inject charge carriers across the interface.
 It can be estimated by comparing the work function of the metal $\Phi _M$ to the electron affinity $\chi$ of the semiconductor, following Mott's equation \cite{Fundamentals}:
 \begin{equation}
-	\Phi _{Barrier} = \Phi _M - (\Phi _S - E_g) = \Phi _M - \chi.
+	\Phi _{Barrier} = \Phi _M - (\Phi _S - E_F) = \Phi _M - \chi.
 \end{equation}
 
-Once in contact, the electron energy levels in vicinity of the interface are depleted, since there are available states in the metal at lower energies. Because the density of states in the metal is much higher than in the semiconductor, the Fermi level of the metal is almost unaffected. At the same time the effect in the semiconductor is more distinct: the electric field, build up by the electrons in the metal prevents electrons from occupying states near the interface. At the same time the doping ions in this region counteract the potential of interface electron charge, so that in a certain distance $x_S$ the properties of semiconductor before contact are restored, see figure \ref{fig:ElFeld}. 
+Once in contact, the electron energy levels in vicinity of the interface are depleted, since there are available states in the metal at lower energies. Because the density of states in the metal is much higher than in the semiconductor, the Fermi level of the metal is almost unaffected, apart from the thin layer at the interface, which host the electrons from the semiconductor. The effect in the semiconductor is more distinct: the electric field, build up by the electrons in the metal prevents electrons from occupying states near the interface. At the same time the doping ions in this region counteract the potential of interface electron charge, so that in a certain distance $x_S$ the properties of semiconductor before contact are restored, see figure \ref{fig:ElFeld}. 
 
 \begin{figure}[hb]
 	\centering
@@ -144,8 +178,9 @@ Once in contact, the electron energy levels in vicinity of the interface are dep
 
 Schottky approximation states that the charge concentration in either metal and semiconductor can be taken as ending abruptly at the depletion region width $x_M$ and $x_S$ respectively, if \( \sqrt{k_B T} << \sqrt{\Phi_{Barrier}} \) \cite{Fundamentals}. Taking into account that there is no electric field in the bulk of either metal and semiconductor, the Poisson equation can be solved in the following manner:
 \begin{align*}
-\frac{d \phi}{dx} | _{x = \infty} = 0, \ \ \
-\frac{d \phi}{dx} | _{x = -\infty} = 0
+\frac{d \Phi}{dx} | _{x = \infty} = 0, \ \ \
+\frac{d \Phi}{dx} | _{x = -\infty} = 0, \ \ \
+\Phi |_{interface} = \Phi_{Barrier}
 \end{align*}
 
 \begin{equation}
@@ -162,10 +197,10 @@ Schottky approximation states that the charge concentration in either metal and 
 \begin{equation}
 \Phi (x) =
 \begin{cases}
-\Phi _{Metal}		 			 									& \text{$x < x_M$} \\ 
-\Phi _{Metal}	- \frac{e}{2 \epsilon _0 \epsilon _M} \rho _M (2xx_M - x^2 )		 & \text{$0 > x > x_M$} \\
-\Phi _{SC}\ \ \ - \frac{e}{2 \epsilon _0 \epsilon _S} \rho _S (2xx_S - x^2 )     & \text{$0 < x < x_S$} \\ 
-\Phi _{SC} = \Phi _{Metal} + \Phi_{Barrier}			 			  & \text{$x > x_S$},
+0			 																														& \text{$x < x_M$} \\ 
+- \frac{e}{2 \epsilon _0 \epsilon _M} \rho _M (2xx_M - x^2 )		 	& \text{$0 > x > x_M$} \\
+- \frac{e}{2 \epsilon _0 \epsilon _S} \rho _S (2xx_S - x^2 )     	& \text{$0 < x < x_S$} \\ 
+\Phi_{Barrier} 			  																												& \text{$x > x_S$},
 \end{cases}
 \end{equation}
 with $\rho _M$ and $\rho _S$ being the constant charge densities of metal and semiconductor\cite{Fundamentals}.
@@ -179,54 +214,103 @@ with $\rho _M$ and $\rho _S$ being the constant charge densities of metal and se
 
 Talking in terms of potential, the accumulation of electrons at the metal side of the interface bends the Fermi level in the depletion region away from the conduction band (see figure \ref{fig:AfterContact}), thus decreasing the amount of mobile charge carriers in this region.
 The width of the depletion region can be calculated according to the formula :
+%Following that sceme, $x_S$ can be calculated according to the formula :
 \begin{align}
  \label{eq:DeplRegion}
  x_S = \sqrt{\frac{2 \epsilon _0 \epsilon _S}{e^- \rho}(U_0 + \Phi_{Barrier})}.
 \end{align}
+\\
+Upon application of reverse bias ($U_0$<0), the barrier between the materials is raised, thus amplifying the effects discussed above: the width of the depletion region grows according to the equation \ref{eq:DeplRegion}, because the voltage attracts electrons situated further from the interface, creating a larger interface electron concentration. The relation between $x_S$ and $U_0$ is a quadratic one \cite{Fundamentals}.
+\\
+In forward bias, the situation is a little more complex. For $U_0 < -\Phi_{Barrier}$ the physics correspond to the discussed cases, with $x_S$ decreasing with growing $U_0$ as equation \ref{eq:DeplRegion} states. Once the height of $\Phi_{Barrier}$ is exceeded, the properties of the junction change : since the voltage applied to the metal is higher than the potential responsible for the accumulation of the electrons at the interface, they will move away from the interface. Because of this, the semiconductor reaches a state, when there is no unbalanced charges at $U_0 = -\Phi_{Barrier}$. When the voltage is raised further, no electron enrichment layer is formed, as one would intuitively assume in correspondence to the case $U_0 < -\Phi_{Barrier}$, but instead the potential course inside the semiconductor is consistent with a resistor - the electric field is constant and the potential forms a straight line from the interface potential $\Phi_{interface} = U_0 + \Phi_{Barrier}$. The exception of this rule is the layer in the vicinity of the interface, where the doping ions and the electrons do not recombine, since the mean free path (mostly a few nm) is greater than the width of this region, so that the electrons can cross into metal, before they collide with a dopand. 
 
+The main result of this changes in potential landscape is the current density, discussed below.
+
+\subsection{Conductivity}
 While the electron transfer from semiconductor to the metal is hindered by the accumulation of the electrons at the interface, which are responsible for this insulating depletion layer, the transfer of electrons from metal into the semiconductor depends upon the difficulty of electron injection into the semiconductor conductance band. The energy conservation states, that in thermodynamic equilibrium, the electron flow from metal to semiconductor $i_{MS}$ and the flow in the opposite direction $i _{MS}$ balance each other. $i_{SM}$ can be calculated assuming the statistical average of the electrons moving in the negative x-direction, $v_0$ \cite{Fundamentals}:
 \begin{align}
-i_{SM}(0) & = \frac{n v_0} {4} exp \left( - \frac{\Phi _{Barrier}}{k_B T} \right) = -i_{MS}(0) \\
+i_{SM}(0) & = \frac{\rho v_0} {4} exp \left( - \frac{\Phi _{Barrier}}{k_B T} \right) = -i_{MS}(0) &
 v_0 & = \sqrt\frac{8k_B T}{\pi m_S^*}
 \end{align}
-with 
+with $v_0$ the average speed of the electrons in the x-direction. 
 
-%\begin{equation}
-%f_M (E_c (\hat{k})) = \frac{1}{exp(\frac{(E_c (\hat{k}) - E_{F,M})}{k_B T}) + 1}
-%\end{equation}
-%is the Fermi distribution in the metal, and
-%\begin{equation}
-%\frac{\delta}{\delta k_x} \frac{E_c(\hat{k})}{h}
-%\end{equation}
-%the velocity distribution, leading to average velocity in x-direction :
-%\begin{equation}
-%i_{MS}(0) = \int_{k_z} \int_{k_y} \int_{k_x > 0} \left( \frac{\delta}{\delta k_x} \frac{E_c(\hat{k})}{h} \right) \cdot f_M(E_c(\hat{k}))\ dk_z\ dk_y\ dk_x.
-%\end{equation}
+If a voltage $U_0$ is applied to the junction, the energy level shifts, from the position of $E_F$ to $E_F -e^-U_0$. This in turn, leads to a change in Fermi distribution of the semiconductor approximately proportional to $exp(U_0)$:
+\begin{equation}
+	i(U) = i_{SM}+i_{MS} = i_{SM}(0)exp(eU/k_B T) - i_{SM} = i_{SM}(exp(eU/k_B T))
+\end{equation}
 
-The resulting so called depletion region is crucial for the function of the Schottky diode. If the doping level is low, the current in negative bias is suppressed, while high levels of doping allow for tunneling, thus providing ohmic current-voltage relation.
+Although this calculation is not exact, since the Fermi distribution has been approximated by the Boltzmann distribution, the energy dispersion of electrons has been approximated as parabolic and the interface states are neglected, for most cases a exponential relation between the current density $i$ and the applied voltage exists. In reverse bias, the electron transfer from the semiconductor to the metal is quenched, yielding a current density, which quickly approaches $i_{MS}$ \cite{Fundamentals}.
 
+\section{Preceding Findings}
+	\label{sec:Preceding}
+	
+	\subsection{Strungaru et al.}
+	\begin{figure}[bh]
+		\centering
+			\includegraphics[width=1.00\textwidth]{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/Schottky-like.png}
+		\caption{I-V-characteristics of the $TiO_2$ sample. Taken from \cite{Strungaru}}
+		\label{fig:Schottky-like}
+	\end{figure}
+	The data, which were desired to be simulated by the simulation, were the results obtained by Strungaru et al. \cite{Strungaru}.
+	In the paper, the authors report of a 5 µm porous Titaniumdioxide layer, fabricated according to \ref{sec:Fabrication}, attached to Titanium substrate on the backside, while electronically contacted via a thin Platinum layer, created via vapor deposition.
 
-If W is in the range of a few nm, the contact is ohmic.
-
-%This process carries on, until a
-%The excess electrons create a , characterized by, driven by
-
+  For the intialization, 30 V in reverse bias have been applied to make sure that all of the present Oxygen vacations are driven towards the Platinum electrode interface. After that the sample express Schottky-like characteristics with distinct electroforming behaviour within the limits of -10 to 10 V application cycle. The onset of electroforming process occurs at the voltage of about 2 V in forward bias, while in reverse bias no electroforming can be detected due to the low current density. For a long durations of forward bias operation (20-90 min), a slight diminishing of current was determined.
+	The results were interpreted in the way, that there are three different classes of Titaniumdioxide volumes inside the sample : completely depleted, highly resistive $TiO_2$-patches ($\sigma_1 = 3.5\cdot 10^{-12} m/\Omega$), strongly doped $TiO_2$ with a high conductivity ($\sigma_2 = 6\cdot 10^{-12}m\Omega$) and partially doping-depleted patches of medium resistivity ($\sigma_3 = 10^{-13} m\Omega$). The onset of electroforming process at +2V was interpreted in the way, that (if there are no unbalanced charges in the semiconductor and the electric field is homogeneous) the minimum field of \(E_{min} = 2V/5 \mu m = 4\cdot 10^5\ eV \) is required to trigger the movement of the donor-like Oxygen defects.
+	In terms of gas sensing, the sample was able to detect Hydrogen concentrations above 15 ppm by a rise in current. Further investigation have shown that a reduction of conductivity took place after each time of Hydrogen exposure, which was attributed to a faster growth of the $\sigma_3$-phase in presence of Hydrogen.
+	
+	\begin{figure}[tbh]
+		\centering
+			\includegraphics[width=1.00\textwidth]{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/Interdependance.png}
+		\caption{Influence of the Hydrogen exposure on the conducting characteristics of the $Pt/TiO_2/Ti$-Diode.}
+		\label{fig:Interdependance}
+	\end{figure}
+	
+\subsubsection{Brief Discussion}
+	The approach to the theory of the electroforming inside the Titaniumdioxide by Strungaru et al. was very similar to the one proposed by Strukov et al. (see section \ref{sec:Memristor}). The only difference was the introduction of a third phase of $TiO_2$ - $\sigma 3$, which was necessary to explain the decrease in the current after long forward bias application.
+	However, both sources fail to account for the nature of the metal-semiconductor interface as discussed in section \ref{sec:Schottky}. The assumption of the stepwise conductivity transition ($\sigma 1\ \rightarrow \sigma 2\ \rightarrow \sigma 3$) is not very realistic as well. In the following section, this model will be expanded in accordance with this points.
+	
+	%\subsection{Jiang H. and Xia Q.}
+	%\cite{Effect}
+	%For a different material (Anordnung) a similar results are reported : in a thin $TiO_2$-layer between two Pt-electrodes, a similar threshold for doping drift can be observed (see figure \ref{pic:Bridging}). In the paper a model of conductivity improvement through formation of low-resistive 'bridges' with high Oxygen vacancy density is introduced. The authors interpret their results in an analogical way to the previously discussed paper : while a part of Oxygen defects is set in motion by low voltages, a complete depletion of vancancies in a given layer is only possible, if a excessively strong electric field is acting upon it.
+	%
+	%\begin{figure}[ht]
+		%\centering
+			%\includegraphics[width=1.00\textwidth]{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/Bridging.png}
+		%\caption{Bridging the Pt-electrodes. Taken from \cite{Effect}.}
+		%\label{fig:Bridging}
+	%\end{figure}
+%
+%Although the geometry of the devices is different, there are key features of $TiO_2$-Films which become apparent after reading the articles:
+%there is a threshold for vacancy drift, as well as a higher threshold for a complete defect repression of defects from a $TiO_2$-layer.
 
 \section{Simulations}
 	\label{sec:Simulations}
 
+\begin{figure}[H]
+	\centering
+		\includegraphics[width=1.00\textwidth]{C:/Users/KM/Documents/Uni/Masterarbeit/LATEX/Images/ModuleMap.png}
+	\caption{Scheme of the Simulation programm.}
+	\label{fig:ModuleMap}
+\end{figure}
+
 \subsection{Units.py}
-	Units-class carries the physical constants, which are used by the main program, like the barrier height at the $Pt/TiO_2$ interface or the lectric filed, necessary for dopand movement. (For convenience reasons, all data in Units.py is normalized to nm and eV, which simplifies the treatment of data in the calculation ...)
+	Units-class carries the physical constants, which are used by the main program, like the barrier height at the $Pt/TiO_2$ interface or the electric filed, necessary for dopand movement $E_{min}$. For convenience reasons, all data in Units.py is normalized to nm and eV, which simplifies the treatment of data by the computer.
 
 \subsection{Poisson Solver}
 	The first component of the simulation program is the Poisson solver, which calculates the potential arising from the doping ions in the depletion region. The Poisson equation:
 	\begin{equation}
 	\Delta\Phi = - \frac{\rho}{\epsilon _0\epsilon_S},
 	\end{equation}
-	where $\Phi$ is the potential resulting from unbalanced charge carriers, $\rho$ the density of doping ions in the depletion region and $\epsilon_s$ is the permittivity of the semiconductor. Since this is a second order differential equation, the first derivative and the offset value must be obtained from boundary conditions. Because the back contact of $TiO_2$ is grounded, we can assume the value of the potential there to be 0, while the depletion region shields the electric field, so that the slope of $\Phi$ is zero in the bulk, so that the first derivative at the back contact is also 0. \\
-	This equation is solved on a discrete grid reads : ??
+	where $\Phi$ is the potential resulting from unbalanced charge carriers, $\rho$ the density of doping ions in the depletion region and $\epsilon_s$ is the permittivity of the semiconductor. Since this is a second order differential equation, the first derivative and the offset value must be obtained from boundary conditions. Because the back contact of $TiO_2$ is grounded, we can assume the value of the potential there to be 0. At the same time the depletion region ,if it is present ($V_0<\Phi_{Barrier}$) does not exceed the dimensions of the sample, shields the electric field, so that the slope of $\Phi$ is zero in the bulk, meaning that the first derivative at the back contact is also 0.\\
+	The Poisson equation is solved on a discrete grid reads :
+	\begin{equation}
+		\Phi(x+dx) = 2\Phi(x) - \Phi(x-dx) - \rho(x) dx^2 \epsilon(TiO_2) \epsilon_0  \ \ \ dx = x_{i+1} - x_i
+	\end{equation}
+	With no voltage applied and for small backward biases, the contribution to potential landscape is only due to the unbalanced charges in the depletion region. In the cases of forward bias or large backward bias, the resistance of the sample comes into play, as discussed in section \ref{sec:Schottky}. The problem is that now we do not know the value of the electric field at the back contact, because apart from the doping ions, there is a non-linearity due to the different resistance of $TiO_2$-layers due to varying Oxygen vacancy concentration.\\
+	However, we do know the potential boundary conditions; along with the estimates of resistance as a function of defect concentration, it is possible to find a solution with following scheme : %ratio
 	
-	In case, when the positive bias exceeds the barrier height, there are no unbalanced carriers, so that the resulting potential is a straight line from interface potential \( \Phi_{Bias} + \Phi_{Barrier} \) to the back contact potential.
+	
+	%In case, when the positive bias exceeds the barrier height, there are no unbalanced carriers, so that the resulting potential is a straight line from interface potential \( \Phi_{Bias} + \Phi_{Barrier} \) to the back contact potential.
 	
 	\subsection{Schottky.py}
 	Schottky.py is the subprogram responsible for the creation of Schottky environment, which then can be influenced by external voltage.
@@ -255,14 +339,14 @@ If W is in the range of a few nm, the contact is ohmic.
 		\begin{equation}
 		f(x,t) = E(x) \mu (O^{2+})
 		\end{equation}	
-		with electric field at a given position E(x) and the vacancy mobility $\mu(O^{2+})$. Assuming electric fields, that point towards the interface positive brings about a minus in the definition of $k_0$, since in that case the movement of Oxygen ions towards the interface would lead to reduction of x.\\
+		with electric field at a given position E(x) and the vacancy mobility $\mu(O^{2+})$.
 		
 		Let's have a closer look at eq. \ref{eq:DensityDrift}. Two major improvements can be done here. The first is, that $\rho$ can be saved only at certain grid positions, which leads to losing information in case of rounding. This error can be avoided by allowing $\rho$ to be saved in 2 neighboring grid points, instead of one, depending on the decimal places of $k_0/dx$ :
 		\begin{align*}
 		\rho(x + k_0, t + \Delta t) &= \rho(x + k_0, t) + \rho(x, t) \times (1 - k_0\% 1)										\\
-		\rho(x + k_0 + sign(k_0), t + \Delta t) &= \rho(x + k_0 + sign(k_0, t)) + \rho(x, t) \times (k_0\% 1)
+		\rho(x + k_0 + 1, t + \Delta t) &= \rho(x + k_0 + 1, t) + \rho(x, t) \times (k_0\% 1)
 		\end{align*}
-		with division rest operator '\%' and sign operator 'sign'. If for example, the displacement $k_0$ happens to be 5.5, then now half of $\rho(x, t)$ will be deposited in the grid cell (x+5), while the other half will end up in (x+6) position. \\
+		with division rest operator '\%'. If for example, the displacement $k_0$ happens to be 5.5, then now half of $\rho(x, t)$ will be deposited in the grid cell (x+5), while the other half will end up in (x+6) position. \\
 		The second improvement is considering an non-uniform binding energy for Oxygen vacancies, with the effect that only a fraction of vacancies moves, if the prevalent field is not sufficiently large. The idea comes from source \cite{Effect}, where it is reported that while at lower voltages a number of vacancies move through Titaniumdioxide to form a conducting bridge, the majority of vacancies stays immobile, until a higher voltage is applied, which drives them away from the interface.
 		Considering an average minimum electric field $E_{min}$, which is needed to set the Oxygen ions in motion leads to an Ansatz :
 		\begin{equation}
@@ -304,15 +388,43 @@ However, we do have three pieces of information: the potential at both end of th
 The method 'ReloadDeltaPhi' first makes use of the solver to calculate the interface potential under current conditions. If the difference between the calculated and the applied potential is greater than 0.1 \% of $\Phi_{Barrier}$, the width of the depletion region is adjusted:
 in case it is too low, the depletion region width is increased, while it is lowered otherwise. After that the potential is calculated again, and the process is repeated until the accuracy condition has been met.
 		
+		\section{Results}
+		
+		\subsection{Initial Conditions}
+		Before the $TiO_2$ is sputtered with Platinum, the doping can be considered to be uniform across the sample. After the contact, however, the electric field inside the depletion region can affect the doping distribution. Its maximum strength can be calculated according to the formula:
+		\begin{equation}
+			E_{max} = \sqrt{\frac{2 e^- \rho_0}{\epsilon \epsilon_0} \Phi_{Barrier}}
+		\end{equation}
+		Its value ($\approx 0.014 V/nm $) is higher than the minimum field required for vacancy drift ($E_{min}$). This means that just by attaching Platinum to $TiO_2$, the migration of dopands can be started. Since the field is directed towards the interface, the movement of Oxygen defects will take place in the same direction, which has three major effects :
+		\begin{itemize}
+			\item The dopands from the depletion region move towards the interface, drastically reducing the amount of Oxygen defects in the depletion region.
+			\item The accumulation of the defects in the near interface region and the following defect deficient layer do not shield the electron accumulation in the metal as good as the uniform defect distribution before, which forces the enlargement of the depletion region, to compensate the potential difference.
+			\item The result of the previous point is that now the dopands, that where on the edge of the depletion region, are subjected to an electric field. This leads to further movement of dopands and stronger interface enrichment along with depletion region growth.
+		\end{itemize}
+
+		This processes only come to a halt, when the field in the dopand-deficient part of the depletion region is smaller than the minimal field required for Oxygen vacancy movement. In that case there is a small amount of dopands in the bulk-facing end of the depletion region, which are responsible for shielding the electric residual field, which is smaller than the $E_{min}$. At the other hand we have a dopand accumulation at the interface, which is exactly large enough to change the electric field from the interface value to a value right below $E_{min}$. This means that in equilibrium there is a layer of poor Oxygen content right behind the interface, where the electric field is just below $E_{min}$. The width of this region is determined by the amount of dopands, which needs to be accumulated at the interface to reduce the built-in electric field of the junction to the value of $E_{min}$, since as long as it is not the case, the dopands from the bulk-facing end of the depletion region will be migrating towards the interface. In other words, in a material, that contains dopands which move under a field in the order of magnitude of the built-in interface electric field, the width of the depletion region is determined not only by the potential difference, but also by the $E_{min}$.
+		
+		\subsection{Rewerse Bias}
+		In the case, when a negative voltage is applied to the Platinum, the situation is essentially the same as in the initial conditions case, with the difference that now the potential difference between the materials is larger, leading to a larger depletion region. Also in this case the determining variable is the $E_{min}$, with the only difference that in that case a larger amount of charge carriers is needed to reduce the interface electric field, resulting in higher interface Oxygen accumulation and a greater width of the Oxygen-deficient region.
+		
+		
+		
+		
+		
+		\subsection{Forward Bias}
+		
+		
+		
+		%fabriated
+		
 		%The knowledge of the potential height at the interface allows us to adjust the width of depletion region, in a way that the Poisson equation yields correct potential value at the interface.
 		
 \newpage
 \begin{thebibliography}{}
 
-
 \bibitem{Missing}
 						Strukov, D. et al. : The missing memristor found.					
-						{\sl Quelle ??}
+						{\sl Nature, Vol 453 (2008)}
 \bibitem{Effect}
 						Jiang H.; Xia Q.:Effect of voltage polarity and amplitude on electroforming of $TiO_2$ based memristive devices. 						
 						{\sl Nanoscale, 5, 3257 (2013)}
@@ -331,52 +443,21 @@ in case it is too low, the depletion region width is increased, while it is lowe
 \bibitem{Titan1}
 						El Achhab, M. : A microstructual study of the structure of plasma oxidized titanium foils.
 						{\sl Appl. Phys, A 116:2039-2044 (2014)}
-\bibitem{Titan2}
-						El Achhab, M: Struktur reiner und platin-bedeckter elektrochemisch oxidierter Titanfolien und ihre Eigenschaften bei Wasserstoffoxidation 
-						{\sl Heinrich-Heine-Universität (2013)}.
+\bibitem{Achhab}
+						El Achhab, M: Struktur reiner und platin-bedeckter elektrochemisch oxidierter Titanfolien und ihre Eigenschaften bei Wasserstoffoxidation.
+						{\sl Heinrich-Heine-Universität (2013)}
+\bibitem{Etching}
+						Roy P.,  Berger S., and  Schmuki P.: TiO2 Nanotubes: Synthesis and Applications.
+						{\sl Angewandte Chemie Int. Edition, 50, (2011)}
 
-
-\bibitem{Cells} Grätzel, M. : Photoelectrochemical cells. 						
-						{\sl Nature, Vol 414 (2001)}
-\bibitem{Beate} Horn, Beate : Cadmiumselenid / Cadmiumsulfid Heterostruktur-Quantenpunkte in Titandioxid.
-						{\sl Heinrich-Heine-Universität (2015)}.
-\bibitem{Svenja} Herbertz, Svenja : Synthese und Charakterisierung von Halbleiterquantenpunkten zur Fluoreszenzmarkierung.
-						{\sl Heinrich-Heine-Universität (2015)}.						
-\bibitem{Small} Reiss,Peter; Protie `re, Myriam; Li,Liang : Core/Shell Semiconductor Nanocrystals.
-						{\sl Small, Wiley-VCH Verlag (2009)}.
-%\bibitem{Highly} Yang, YUE : Highly stable CdSe/CdS/ZnS Flourophores in Acidic Environment: Acile preparation and modification of core/shell/shell nanocrystals.{\sl Chem. Res. Chinese Universities 26(6) (2010)}.
-
-						{\sl Computational Materials Science, vol. 45.1 (2009)}.
-\bibitem{QDs-SC} Robel, Istva ´n; Subramanian, Vaidyanathan; Kuno, Masaru; Kamat, Prashant : Quantum Dot Solar Cells. Harvesting Light Energy with CdSe Nanocrystals Molecularly Linked to Mesoscopic TiO2 Films.
-						{\sl Journal of Amarican Chemical Society 128 (2006)}.
-\bibitem{Optic} Yu W., Qu L.,2003, Experimental Determination of the Extinction Coefficient ofCdTe, CdSe, and CdS Nanocrystals.
-						{\sl Chem. Mater. 15 (2003)}.
-
-\bibitem{Highly}Yang, Y. et al. : Highly Stable CdSe/CdS/ZnS Flourophores in acidic Environment: Acile Preparation and Modification of Core/																	shell/shell nanocrystals. {\sl Chem. Res. Chinese Universities, 26(6) (2010)}
-\bibitem{Enhanced}Li, Z. et al. : Enhanced photovoltaic performance of solar cell based on front-side illuminated CdSe/CdS double-sensitized TiO2 nanotube arrays electrode.						{\sl Journal of Materials Science, 49 (2014)}
-\bibitem{Wave-Function}Ning, Z. et al. : Wave-Function Engineering of CdSe/CdS Core/Shell Quantum Dots for enhanced electro transfer to a TiO\textsubscript{2} substrate.						{\sl The Journal of Physical Chemistry C, 114 (2010)}
-\bibitem{Tracking}Pernik, D. R. et al. : Trackng the Absorption and electron injection rates of CdSe Quantum Dots on TiO\textsubscript{2}: linked versus direct attachment. {\sl The Journal of Physical Chemistry C, 115 (2011)}
-\bibitem{Praktikum} Blachnik, N. : Grundmodul physikalische Chemie : CdSe-Nanokristalle {\sl Universität Mainz
-						Institut für Physikalische Chemie (Jahr 2014)}
-\bibitem{Brus}Brus, Luis : Electronic Wave functions in Semiconductor Clusters : Experiment and Theory.
-						{\sl The Journal of Physical Chemistry, Vol. 90, No. 12 (1986)}
-\bibitem{Marx} Gross R., Marx A. : Festkörperphysik. {\sl de Gruyter (2014)}
-\bibitem{Achhab}El Achhab, M: Struktur reiner und platin-bedeckter elektrochemisch oxidierter Titanfolien und ihre Eigenschaften bei Wasserstoffoxidation {\sl Heinrich-Heine-Universität (2013)}.
-\bibitem{Surface} Oura A., Lifshits V.G., Saranin A.A., Zoltov A.V., Katayama M. : Surface Science, an introduction.
-						{\sl Springer (2003)}
-\bibitem{Woodley} S. Woodley, C. Catlow: Structure prediction of titania phases: Implementation of Darwinian versus Lamarckian concepts in an Evolutionary Algorithm.
-\bibitem{Murray} Murray C.B., Norris D.J., Bawendi M.G. : Synthesis and Characterization of Nearly Monodisperse CdE (E=S,Se,Te) Semiconductor Nanocrystalities {\sl J. Am. Chem. Soc. 115 (1993)}
-
-\bibitem{Dickerson} Dickerson B. D. : Organometallic Synthesis Kinetics of CdSe Quantum Dots.   
-						{\sl Virginia Polytechnic Institute and State University (2005)}
-\bibitem{Haug}Haug H., Stephan W.:Quantum Theory of the Optical and  Electronic Properties of Semiconductors.
-						{\sl River Edge, NJ: World Scientific (2004)}
-\bibitem{Rotz}Grätzel M.,  Rotzinger P. : The influence of the crystal lattice structure on the conduction band energy on oxides of Titanium. 
-						{\sl Chemical Physical Letters, Volume 118, Number 59 (1985)}
-
- 
-
-
+%\bibitem{Cells} Grätzel, M. : Photoelectrochemical cells. 						
+						%{\sl Nature, Vol 414 (2001)}
+%\bibitem{Beate} Horn, Beate : Cadmiumselenid / Cadmiumsulfid Heterostruktur-Quantenpunkte in Titandioxid.
+						%{\sl Heinrich-Heine-Universität (2015)}.
+%\bibitem{Svenja} Herbertz, Svenja : Synthese und Charakterisierung von Halbleiterquantenpunkten zur Fluoreszenzmarkierung.
+						%{\sl Heinrich-Heine-Universität (2015)}.						
+%\bibitem{Small} Reiss,Peter; Protie `re, Myriam; Li,Liang : Core/Shell Semiconductor Nanocrystals.
+						%{\sl Small, Wiley-VCH Verlag (2009)}.
 
 \end{thebibliography}
 
