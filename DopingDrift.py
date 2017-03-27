@@ -20,6 +20,7 @@ def DriftRK(Sample, DriftAmount = 1.0):
 	dt = Sample.dt
 	
 	DP = zeros(nx)
+	
 	# Runge-Kutta 4th Order Scheme
 	for i in range(0,len(Phi)):
 		if ((Sample.DopingDensity[i] != 0) &  (abs(E[i]) != 0)) :
@@ -52,7 +53,7 @@ def DriftRK(Sample, DriftAmount = 1.0):
 			DP[i] = DP[i] - Sample.DopingDensity[i]*DriftAmount
 	# Depositing the Doping at the new Position
 			DP[k]  = DP[k] + Sample.DopingDensity[i]*DriftAmount*(1-k0%1)
-			DP[k+1]  = DP[k+1] + Sample.DopingDensity[i]*DriftAmount*(k0%1)					
+			DP[k+1]  = DP[k+1] + Sample.DopingDensity[i]*DriftAmount*(k0%1)				
 			del k0, k1, k2, k3, k4, k, DriftAmount
 	#del dx, nx, E
 	Sample.DopingDensity = DP+Sample.DopingDensity
