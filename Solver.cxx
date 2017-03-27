@@ -1,144 +1,72 @@
-#include <iostream>
-#include <fstream>
-#include <math.h>
-using namespace std;
+from numpy import *
+import matplotlib.pyplot as plt
+from copy import deepcopy
+import Units as u
 
-
-class programming
-{
-   private:
-
-   public:
-      int nx;
-
-      void input_value()
-      {
-         cout << "In function input_value, Enter an integer\n";
-         cin >> nx;
-      }
-
-      void output_value()
-      {
-         cout << "Variable entered is ";
-         cout << nx << "\n";
-      }
-
-      void initializePhi(double* Phi)
-      {
-        for(int i=0; i<nx; i++ ){
-            Phi[i] = 0;
-        }
-      }
-
-      void showList(double* Phi)
-      {
-        cout << "\n";
-        for(int i=0; i<nx; i++ ){
-            cout << Phi[i] << " ";
-        }
-      }
-
-      /*void solveForPhi(double* Phi, double* Rho){
-        double Phi2[nx-2];
-        for(int i =0; i<nx-2; i++)
-        {
-         Phi2[i] = Phi[i]+Phi[i+2];
-        }
-
-        for(int i =0 ; i<nx-2; i++){
-            Phi[i+1] = (Phi2[i] - Rho[i])/2;
-        }
-      }*/
-
-      void solveForPhiLU(double* X, double* Rho, double* Phi, int n){
-        const double dx = X[1] - X[0];
-        // Saving the last value :
-        const double Phi_end = Phi[n-1];
-        // Initial Guess:
-        Phi[1] = Phi[0]; //+ Rho[1]*dx;
-        // Calculation of Potential Profile
-        for(int j = 0; j < n-2; j++){
-            Phi[j+2] = 2*Phi[j+1] - Phi[j] + Rho[j+1]*dx*dx;
-        }
-        // Termination of linear degree of freedom :
-        const double Phi_1 = Phi_end - Phi[n-1];
-        const double X_range = X[n-1] - X[0];
-        for(int i=0; i<n; i++){
-            Phi[i] += Phi_1*(X[i]-X[0])/X_range;
-        }
-      }
-
-      void linspace(double* List, double min, double max, int n){
-        for(int i = 0; i< n; i++){
-            List[i] = min+(max-min)*i/(n-1);
-        }
-      }
-
-      void writeFile(string Name, double* List1, double* List2, double* List3, int n)
-      {
-        ofstream myFile;
-        myFile.open("Example.txt");
-        for(int i =0; i <n; i ++){
-            myFile << List1[i] << "\t" << List2[i] << "\t" << List3[i] << "\n";
-        }
-        myFile.close();
-      }
-
-};
-
-main()
-{
-    programming a;
-
-    // Input of Grid frequency
-    a.input_value();
-    a.output_value();
-
-    // Cration of X-array
-    double X[a.nx];
-    a.linspace(X, -1.0, 2.0, a.nx);
-
-    // Creation of Potential-Array
-    double Phi[a.nx];
-    a.initializePhi(Phi);
-
-    double Rho[a.nx];
-    // Definition of inital Conditions
-    // Definition of Charge Density
-    /*
-    Example #1
-    double Rho0 = 6.0;
-    a.linspace(Rho, -Rho0 , 2.0*Rho0, a.nx);
-    // Initial Condition for the Potential
-    Phi[0] = -1; Phi[a.nx-1] = 8;
-
-    // Example #2
-    for(int i = 0; i<a.nx ; i++){
-        Rho[i] = X[i]*X[i]*12.0;
-    }
-    // Initial Condition for the Potential
-    Phi[0] = 1; Phi[a.nx-1] = 16;
-
-    // Example #3
-    for(int i = 0; i<a.nx ; i++){
-        Rho[i] = sin(X[i]*2.0*M_PI);
-    }
-    // Initial Condition for the Potential
-    Phi[0] = 0; Phi[a.nx-1] = 0;
-    */
-    // Example #4
-    for(int i = 0; i<a.nx ; i++){
-        Rho[i] = exp(X[i]);
-    }
-    // Initial Condition for the Potential
-    Phi[0] = exp(X[0]); Phi[a.nx-1] = exp(X[a.nx-1]);
-
-
-
-    // Applying the Solver
-    a.solveForPhiLU(X, Rho, Phi, a.nx);
-    a.writeFile("File1", X, Rho, Phi, a.nx);
-
-    return 0;
-}
-//object.variable;  Will produce an error because variable is private
+def E_Field(X, Phi, E):
+	dx = X[1]-X[0]
+	E = deepcopy(X)
+	for i in range(len(X)-1) :
+		E[i+1] = (Phi[i] - Phi[i+1])/dx
+	E[0] = E[1]
+	
+	return E
+	
+def solverLU(Sample):
+	dx = Sample.dx
+	nx = Sample.nx
+	Phi = Sample.Phi
+	Rho = Sample.ChargeDensity
+	
+	#Phi_ende = deepcopy(Sample.Phi[-1])
+	# Solution based only on present unbalanced Charge 
+	Phi[-1] = Phi[-2] = 0	
+	for j in range(nx-2):
+		Phi[nx-3-j] = 2*Phi[nx-j-2] - Phi[nx-j-1] - Rho[nx-j-2]*dx**2/Sample.Dieelek[nx-j-2]
+	
+	if(Sample.Bias > abs(u.BarrierHeight)):
+		#Phi_ende = deepcopy(Sample.Phi[-1])		
+		
+		#for j in range(len(Phi)-2):		
+			#Phi[j+2] = 2*Phi[j+1] - Phi[j] - Rho[j+1]*dx**2/Sample.Dieelek[j+1]	
+		# Second derivative is calculated by now
+		
+		# Calculation of the total resistance of the Sample
+		N = TotalResistance(Sample)
+		Ntotal = sum(N)
+		
+		Phi2 = zeros(nx)
+		Phi2[0] = Sample.Bias + u.BarrierHeight - Phi[0]
+		for i in range(len(Phi)-1):
+			Phi2[i+1] = Phi2[i] - (N[i]/Ntotal)*Phi2[0]
+		
+		Sample.Phi = Phi2 + Phi
+		
+		#Sample.Phi = Sample.Phi + (Phi_ende-Sample.Phi[-1])*(Sample.X-Sample.X[0])/dx
+	else:
+		if(Sample.W >= u.DeviceLength):
+			N = TotalResistance(Sample)
+			Ntotal = sum(N)
+			
+			Phi2 = zeros(nx)
+			Phi2[0] = Sample.Bias + u.BarrierHeight - Phi[0]
+			for i in range(len(Phi)-1):
+				Phi2[i+1] = Phi2[i] - (N[i]/Ntotal)*Phi2[0]
+		
+			Sample.Phi = Phi2 + Phi
+			
+			#Phi_start = deepcopy(Sample.Phi[0])
+			#Sample.Phi = Sample.Phi + (Sample.Bias - u.BarrierHeight - Phi_start)*(Sample.X[-1]-Sample.X)/Sample.X[-1]
+	return
+	
+def TotalResistance(Sample):
+	dx = Sample.dx
+	N = zeros(Sample.nx)
+	for j in range(Sample.nx) :
+		N[j] = u.R0/(exp((Sample.DopingDensity[j]-u.Titanium_DopingDensity)*1.8)+1)
+		#if(  Sample.DopingDensity[j]  > 1.1*u.Titanium_DopingDensity) :  N[j] = u.R2*dx
+		#elif(Sample.DopingDensity[j] <  0.9*u.Titanium_DopingDensity) :  N[j] = u.R3*dx
+		#else: 															 N[j] = u.R1*dx
+	return N
+	
+#-----------------------------------------------------------
