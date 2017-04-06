@@ -20,7 +20,7 @@ def DriftRK(Sample, DriftAmount = 1.0):
 	dt = Sample.dt
 	
 	DP = zeros(nx)
-	
+	#print("DriftRK")
 	# Runge-Kutta 4th Order Scheme
 	for i in range(0,len(Phi)):
 		if ((Sample.DopingDensity[i] != 0) &  (abs(E[i]) != 0)) :
@@ -40,20 +40,37 @@ def DriftRK(Sample, DriftAmount = 1.0):
 	
 			k0 = (k1/6 + k2/3 + k3/3 + k4/6)
 			#print(E[i],k0, sign(k0))
-	# k0 is the change in the index		
+	# k0 is the displacement in terms of change in the index		
 	# k = new index of a given moving Doping partition
 			k = int(i+k0)
+			#if(k0 != 0): print(k0)
 	# Doping must not be allowed to leave the Sample
-			if(k<1): k = 1
-			if(k>(nx-2)): k = nx-2
+			#if(k<1): k = 1
+			#if(k>(nx-2)): k = nx-2
 	# Calculation the DriftAmount via Super-Duper-Formula
-			DriftAmount =  ((1-exp(-(E[i]/u.E_min)**2))*dt)
-			if(DriftAmount > 1) : DriftAmount = 1
+			#DriftAmount =  (1-exp(-(E[i]/(2*u.E_min))**8))*dt/10
+			#if(DriftAmount > 1) : DriftAmount = 1
 	# Removing the doping from its initial Position	
-			DP[i] = DP[i] - Sample.DopingDensity[i]*DriftAmount
+			#DP[i] = DP[i] - Sample.DopingDensity[i]*DriftAmount
 	# Depositing the Doping at the new Position
-			DP[k]  = DP[k] + Sample.DopingDensity[i]*DriftAmount*(1-k0%1)
-			DP[k+1]  = DP[k+1] + Sample.DopingDensity[i]*DriftAmount*(k0%1)				
+			#DP[k]  = DP[k] + Sample.DopingDensity[i]*DriftAmount*(1-k0%1)
+			#DP[k+1]  = DP[k+1] + Sample.DopingDensity[i]*DriftAmount*(k0%1)	
+			
+			DriftAmount = DriftAmount =  (1-exp(-(E[i]/(2*u.E_min))**8))*dt
+			if(DriftAmount > 1) : DriftAmount = 1
+			DP[i] = DP[i] - Sample.DopingDensity[i]*DriftAmount
+			
+			n = 0
+			k0 = int(abs(k0)+1)
+			while(abs(n) < k0):
+				n = n + sign(k0)
+				
+				k = int(i+n)
+				if(k<1): k = 1
+				if(k>(nx-2)): k = nx-2
+				
+				DP[k]  = DP[k] + Sample.DopingDensity[i]*DriftAmount/k0
+			
 			del k0, k1, k2, k3, k4, k, DriftAmount
 	#del dx, nx, E
 	Sample.DopingDensity = DP+Sample.DopingDensity
