@@ -101,6 +101,7 @@ class Schottky(object) :
 		plt.xlabel("X [nm]")
 		plt.ylabel("Doping Concentration")
 		P6, = plt.plot(self.X, self.DopingDensity, color = "Grey", label = "Oxygen Vacancy Density [1/nm^3]")
+		P7, = plt.plot(self.X, TotalResistance(self)/self.dx, color = "Green", label = "Resistance [Ohm/nm]")
 		plt.legend()
 		
 		plt.show()
@@ -109,6 +110,8 @@ class Schottky(object) :
 		
 	def WriteToFile(self, File):
 		savetxt(File, (self.Phi, self.DopingDensity, self.ChargeDensity), newline="\n")
+		return
 	
 	def Diffusion(self, DiffusionCoeffcient):
 		self.DopingDensity = Diffusion(self.X, self.dt, self.DopingDensity, DiffusionCoeffcient)
+		return
