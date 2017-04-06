@@ -8,7 +8,7 @@ from ChargeRedistribution import *
 import Schottky as S
 
 VoltageOnMetal = 0 # V
-TimeStep = 1 # second
+TimeStep = 1 # seconds
 GridPointsNumber = 50001 # per u.DeviceLength = 5µm => 10 grid points per nm
 
 #-------------------------------
@@ -73,30 +73,37 @@ def Run(Bias, dt, nx):
 	
 	# Read Sample Data from a File
 	#Import(Sample, "V=0T=200min")
-	Import(Sample, "V=10-10(2)T=3000s")
+	#Import(Sample, "V=0(1)T=43200s")
+	#Import(Sample, "V=30(4)T=18000s")
+	Import(Sample, "V=0(5)T=3600s")
 	
 	# Plot Initial Conditions
 	Sample.PlotResults()
 
-	V = AddVoltageTrace(-10, 0, 100)
+	V = AddVoltageTrace(10, 10, 100)
+	#V = AddVoltageTrace(0, 10, 100)
+	#V = AddVoltageTrace(10, -10, 200, V)
+	#V = AddVoltageTrace(-10, 0, 100, V)
+	#V = AddVoltageTrace(0,0,1,V)
 	#print(V)
-	
+	Sample.W = u.DeviceLength/10
 #-------------------------------
-	T = 0
-	R = []
-
+	T = [64800]
+	R = [sum(TotalResistance(Sample))*Sample.dx]
+	C = [sum(Sample.ChargeDensity)*Sample.dx]
+	
 	# Drift paired with Diffusion
-	DiffusionSteps = 1
-	DriftIterations = int(1/Sample.dt)*10
+	DiffusionSteps = 0
+	DriftIterations = 10
 
 	print("Start of Simulation Process")
 	for i in range(len(V)) :#fix20 = 20mal Bilder Anzeigen
 		Sample.Bias = V[i]
-		print("New Bias =", Sample.Bias, "V")
+		print("Current Bias =", Sample.Bias, "V")
 	
 		for j in range(DriftIterations) :
 			# Time actualization
-			T = T+dt
+			T = T +[T[-1]+dt]
 			
 			print("Drift")
 			Sample.Phi[0] = Sample.Bias + u.BarrierHeight
@@ -104,36 +111,27 @@ def Run(Bias, dt, nx):
 			OxygenDrift(Sample, 1)
 			
 			#print("Diffusing")
-			#OxygenDiff(Sample, DiffusionSteps, 1)
+			OxygenDiff(Sample, DiffusionSteps, 1)
 			#for h in range(DiffusionSteps) :
 				#Sample.DopingDensity[:20000] = Diffusion(Sample.X[:20000], Sample.dt , Sample.DopingDensity[:20000], 1)
 			#ReloadDeltaPhi(Sample)
 			
 			#Resistance Calculation
-			"""
-			R0 = R_1 = R1 = R3 = C = 0
-			# R0 = original density, R_1 = lower, R1 = higher
-			for g in range(nx) :
-				Rho = Sample.DopingDensity[g]
-				if (Rho==u.Titanium_DopingDensity) : R0  = R0  + Sample.dx
-				if (Rho <u.Titanium_DopingDensity) : R_1 = R_1 + Sample.dx
-				if (Rho >u.Titanium_DopingDensity) : R1  = R1  + Sample.dx
-				#R0 = R0 + Sample.dx * Sigma(Sample.DopingDensity[g])
-			C = sum(Sample.ChargeDensity)*Sample.dx
-			R = R +[(T, R0, R_1, R1, C, Sample.W, Sample.Bias)]
-			del R0, R_1, R1, R3, C
-			"""
-		print(T, sum(Sample.DopingDensity))
-		print("Time = ",T, "s, 'Drift' Method executed", (i+1)*DriftIterations, " times")
+			C = C + [sum(Sample.ChargeDensity)*Sample.dx]
+			R = R + [sum(TotalResistance(Sample))*Sample.dx]
+			
+		print(T[-1], sum(Sample.DopingDensity))
+		print("Time = ",T[-1], "s, 'Drift' Method executed", (i+1)*DriftIterations, " times")
 		print("Depletion region width = ", Sample.W, " nm")
+		if((V[i]%1)< 0.001) : Sample.PlotResults()
 		#Sample.PlotResults()
 		ReloadDeltaPhi(Sample)
 	print("End of Simulation Process")
 	Sample.PlotResults()
 
 	# Save Results
-	#savetxt("Resistance5-5V(0)", R , newline="\n")
-	WriteToFile(Sample, "V=10-10(3)T=4000s")
+	savetxt("Resistance10V(0)", (T, R, C), newline="\n")
+	WriteToFile(Sample, "V=10(5)T=66000s")
 
 	plt.show()
 	return 0
