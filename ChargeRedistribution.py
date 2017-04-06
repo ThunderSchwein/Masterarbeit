@@ -38,16 +38,14 @@ def ReloadFermi(X, DopingDensity, Potential, ElectricField ,FermiLevel = 0):
 def ReloadDeltaPhi(Sample) :
 	#print("Redistributing the Electrons")
 	nx = Sample.nx
-	#Phi2 = Sample.Phi
 	
 	Sample.ChargeDensity = zeros(nx)
 	
-	if(Sample.Bias < abs(u.BarrierHeight)):
-		#DepletionRegionCharge = u.Titanium_DopingCharge
+	if(Sample.Bias < -u.BarrierHeight):
 		factor1 = 1.05
-		factor2 = 1.001
-		factor3 = 1.0002
-		factor4 = 1.00004
+		factor2 = 1.01
+		factor3 = 1.002
+		factor4 = 1.0004
 		
 		# Inital Guess
 		#Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*DepletionRegionCharge
@@ -84,10 +82,10 @@ def ReloadDeltaPhi(Sample) :
 				#print(4, Sample.W, Sample.Phi[0])
 			#del DepletionRegionCharge
 	else:
-		Sample.W = u.Titanium_FreePathLength
+		Sample.W = 0#u.Titanium_FreePathLength
 		Sample.Phi[0] = Sample.Bias + u.BarrierHeight
-		#Sample.ChargeDensity = zeros(nx)
-		Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
+		Sample.ChargeDensity = zeros(nx)
+		#Sample.ChargeDensity[:int(Sample.W/u.DeviceLength*nx)] = Sample.DopingDensity[:int(Sample.W/u.DeviceLength*nx)]*u.Titanium_DopingCharge
 		solverLU(Sample)
 		
 	#print(0, Sample.W, Sample.Phi[0])
