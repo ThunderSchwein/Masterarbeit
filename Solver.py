@@ -18,7 +18,8 @@ def solverLU(Sample):
 	Phi = Sample.Phi
 	Rho = Sample.ChargeDensity
 	
-	#Phi_ende = deepcopy(Sample.Phi[-1])
+	#print("Solver")
+	
 	# Solution based only on present unbalanced Charge 
 	Phi[-1] = Phi[-2] = 0	
 	for j in range(nx-2):
@@ -50,6 +51,7 @@ def solverLU(Sample):
 			
 			Phi2 = zeros(nx)
 			Phi2[0] = Sample.Bias + u.BarrierHeight - Phi[0]
+			#print(Phi2[0])
 			for i in range(len(Phi)-1):
 				Phi2[i+1] = Phi2[i] - (N[i]/Ntotal)*Phi2[0]
 		
@@ -62,11 +64,23 @@ def solverLU(Sample):
 def TotalResistance(Sample):
 	dx = Sample.dx
 	N = zeros(Sample.nx)
-	for j in range(Sample.nx) :
-		N[j] = u.R0/(exp((Sample.DopingDensity[j]-u.Titanium_DopingDensity)*1.8)+1)
+	R0 = 120
+	for j in range(Sample.nx):
+		if((Sample.DopingDensity[j]/u.Titanium_DopingDensity) < 0.001): 
+			N[j] = 1000*dx
+		else :
+			N[j] = (R0/(Sample.DopingDensity[j]/u.Titanium_DopingDensity)**(1/5) + 500/3)*dx
+		
+	#for j in range(Sample.nx) :
+		#R0 = 1000
+		#N[j] = (u.R0/(exp((Sample.DopingDensity[j]/u.Titanium_DopingDensity)*2.6)+1) + 500/3)*dx
+		
+		#R0 = 1000
+		#N[j] = u.R0/(exp((Sample.DopingDensity[j]-u.Titanium_DopingDensity)/u.Titanium_DopingDensity*1.8)+1)*dx
+		
 		#if(  Sample.DopingDensity[j]  > 1.1*u.Titanium_DopingDensity) :  N[j] = u.R2*dx
 		#elif(Sample.DopingDensity[j] <  0.9*u.Titanium_DopingDensity) :  N[j] = u.R3*dx
-		#else: 															 N[j] = u.R1*dx
+		#else: 	   														  N[j] = u.R1*dx
 	return N
 	
 #-----------------------------------------------------------
