@@ -3,13 +3,14 @@ import matplotlib.pyplot as plt
 from copy import deepcopy
 import Units as u
 from SolverLU import *
-from DopingDrift import DriftRK, Diffusion
+from DopingDrift import DriftRK, Smoothing
 from ChargeRedistribution import *
 import Schottky as S
 
 VoltageOnMetal = 0 # V
-TimeStep = 1 # seconds
-GridPointsNumber = 50001 # per u.DeviceLength = 5µm => 10 grid points per nm
+TimeStep = 0.1 # seconds
+GridPointsNumber = 5001 # per u.DeviceLength = 5µm => 10 grid points p = 0.1
+DriftAmount0 = 0.1
 
 #-------------------------------
 
@@ -17,9 +18,9 @@ def Init_Sample(Bias, dt, nx):
 	print("A Sample has been created.")
 	return S.Schottky(Bias, dt, nx)
 
-def OxygenDrift(Sample, Iterations):
+def OxygenDrift(Sample, Iterations, DriftAmount):
 	for i in range(Iterations):
-		Sample.DopingDrift()
+		Sample.DopingDrift(DriftAmount)
 	return
 	
 def OxygenDiff(Sample, Iterations, DiffCoefficient):
@@ -70,31 +71,37 @@ def AddVoltageTrace(Vstart, Vend, Steps = 0, V = []):
 def Run(Bias, dt, nx):
 	# Sample Initialization
 	Sample = Init_Sample(Bias,dt,nx)
-	
 	# Read Sample Data from a File
-	#Import(Sample, "V=0T=200min")
-	#Import(Sample, "V=0(1)T=43200s")
-	#Import(Sample, "V=30(4)T=18000s")
-	Import(Sample, "V=0(5)T=3600s")
+	Import(Sample, "V=-30(1)T=43200s")
+
+	print("Initial Depletion Region Width = ", Sample.W)
+	
+	#Sample.DopingDensity = zeros(Sample.nx)
+	#Sample.DopingDensity[1:] = ones(Sample.nx-1)*0.000001
+	#Sample.DopingDensity[0] = 0.4951
+	
 	
 	# Plot Initial Conditions
 	Sample.PlotResults()
 
-	V = AddVoltageTrace(10, 10, 100)
-	#V = AddVoltageTrace(0, 10, 100)
-	#V = AddVoltageTrace(10, -10, 200, V)
+	#V = AddVoltageTrace(-30, -30, 432)
+	#SetDepletionWidth(Sample, 5000)
+	
+	V = AddVoltageTrace(0, 10, 100)
+	V = AddVoltageTrace(10, 0, 100, V)
+	V = V + [0]
+	
 	#V = AddVoltageTrace(-10, 0, 100, V)
 	#V = AddVoltageTrace(0,0,1,V)
 	#print(V)
-	Sample.W = u.DeviceLength/10
 #-------------------------------
-	T = [64800]
-	R = [sum(TotalResistance(Sample))*Sample.dx]
-	C = [sum(Sample.ChargeDensity)*Sample.dx]
+	T = [0]
+	R = [sum(Resistivity(Sample))]
+	v = [V[0]]
 	
-	# Drift paired with Diffusion
-	DiffusionSteps = 0
-	DriftIterations = 10
+	# Drift steps
+	DriftIterations = 1
+	SmoothingSteps = 0
 
 	print("Start of Simulation Process")
 	for i in range(len(V)) :#fix20 = 20mal Bilder Anzeigen
@@ -104,34 +111,29 @@ def Run(Bias, dt, nx):
 		for j in range(DriftIterations) :
 			# Time actualization
 			T = T +[T[-1]+dt]
+			v = v + [Sample.Bias]
+			#print("Drift", j)
+			Reload(Sample)
+			OxygenDrift(Sample, 1, DriftAmount0)			
+			for k in range(SmoothingSteps): Smoothing(Sample)
+			Reload(Sample)
 			
-			print("Drift")
-			Sample.Phi[0] = Sample.Bias + u.BarrierHeight
-			ReloadDeltaPhi(Sample)
-			OxygenDrift(Sample, 1)
+			R = R + [sum(Resistivity(Sample))]
+						
 			
-			#print("Diffusing")
-			OxygenDiff(Sample, DiffusionSteps, 1)
-			#for h in range(DiffusionSteps) :
-				#Sample.DopingDensity[:20000] = Diffusion(Sample.X[:20000], Sample.dt , Sample.DopingDensity[:20000], 1)
-			#ReloadDeltaPhi(Sample)
-			
-			#Resistance Calculation
-			C = C + [sum(Sample.ChargeDensity)*Sample.dx]
-			R = R + [sum(TotalResistance(Sample))*Sample.dx]
-			
-		print(T[-1], sum(Sample.DopingDensity))
+		print(int(T[-1]), sum(Sample.DopingDensity))
 		print("Time = ",T[-1], "s, 'Drift' Method executed", (i+1)*DriftIterations, " times")
 		print("Depletion region width = ", Sample.W, " nm")
-		if((V[i]%1)< 0.001) : Sample.PlotResults()
 		#Sample.PlotResults()
-		ReloadDeltaPhi(Sample)
+		#print(Sample.Phi[0])
 	print("End of Simulation Process")
 	Sample.PlotResults()
 
 	# Save Results
-	savetxt("Resistance10V(0)", (T, R, C), newline="\n")
-	WriteToFile(Sample, "V=10(5)T=66000s")
+	#V = V + [0]
+	print(len(R), len(v), len(T))
+	savetxt("Resistance10V(08)", (T, v, R), newline="\n")
+	WriteToFile(Sample, "V=10(08)T=100s")
 
 	plt.show()
 	return 0
