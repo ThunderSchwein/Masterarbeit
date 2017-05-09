@@ -6,18 +6,28 @@ from SolverLU import *
 #from DopingDrift import DriftRK, Diffusion
 from ChargeRedistribution import *
 import Schottky as S
-from Run import Init_Sample, Import
+from Run import Init_Sample
 
-Sample = Init_Sample(0, 1, 5001)
-Import(Sample, "V=10(01)T=100s")
-#Import(Sample, "V=0T=200min")
+File = "V=10(05)T=201s"
+D =  loadtxt(File)
+nx = len(D[0,:])
+Sample = Init_Sample(0, 1, nx)
+Sample.Import(File)
+
+#Sample.Bias = -30
+#Sample.W = 100000000000
+#solverLU(Sample)
+#print(Sample.Phi[0])
+
 Sample.PlotResults()
-plt.show()
-D =  loadtxt("Resistance10V(01)")
+
+D =  loadtxt("Resistance10V(05)")
 
 T	= D[0,:]
 V   = D[1,:]
 R   = D[2,:]
+I   = D[3,:]
+W 	= D[4,:]
 
 plt.figure("Resistance")
 R5, = plt.plot(V, R*1e-6, label = "Total R [MOhm]")
@@ -25,16 +35,20 @@ plt.xlabel("t[min]")
 plt.legend()
 
 plt.figure("Current")
-R7, = plt.plot(V[int(len(V)/2):], V[int(len(V)/2):]/(R[int(len(V)/2):]*1e-6), label = "Current_rising")
-R6, = plt.plot(V[:int(len(V)/2)], V[:int(len(V)/2)]/(R[:int(len(V)/2)]*1e-6), label = "Current_decreasing")
+R9, = plt.plot(V, I, label = "Current")
+#R7, = plt.plot(V[:int(len(V)/2)], I[:int(len(V)/2)], label = "Voltage_rising")
+#R6, = plt.plot(V[int(len(V)/2):], I[int(len(V)/2):], label = "Current_decreasing")
 plt.xlabel("U[V]")
-plt.legend()
+plt.legend(loc = 2)
 
-#savetxt("Resistance10V(001)", (T, V, R), newline="\n")
+plt.figure("Current2")
+R8, = plt.plot(I*1e6, label = "Current")
+plt.xlabel("U [V]")
+plt.ylabel("I [µA]")
+plt.legend(loc = 2)
 
-#plt.figure("Capacity")
-#plt.plot(T, C)
-#plt.figure("Mott-Schottky")
-#plt.plot(V, 1/(C*C))
+plt.figure("Depletion")
+R9, = plt.plot(T*5, W, label = "Breite der Verarmungsregion")
+plt.legend(loc = 2)
 
 plt.show()
