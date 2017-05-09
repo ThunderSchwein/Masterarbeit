@@ -118,13 +118,10 @@ def DriftRK(Sample, DriftAmount_0 = 1 ):
 				
 				# Removing the doping from its initial Position	
 				DP[i] = DP[i] - DP0[i]*DriftAmount
-				# Depositing the Doping at the new Position
-				for h in range(k+1):
-					g = i + h
-					DP[g] = DP[g] + DP0[i]*DriftAmount/k
 				
-				#DP[k]  = DP[k] + (DP0[i])*DriftAmount*(1-(k0%1)/2)
-				#DP[k+1]  = DP[k+1] + (DP0[i])*DriftAmount*((k0%1)/2)
+				# Depositing the Doping at the new Position
+				DP[k]  = DP[k] + (DP0[i])*DriftAmount*(1-(k0%1)/2)
+				DP[k+1]  = DP[k+1] + (DP0[i])*DriftAmount*((k0%1)/2)
 				
 				# Setting the allocated memory free
 				del k0, k1, k2, k3, k4, k
